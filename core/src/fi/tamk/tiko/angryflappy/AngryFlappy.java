@@ -53,6 +53,7 @@ public class AngryFlappy extends ApplicationAdapter {
         allFrames = to1DArray(tmp);
         running = new Animation(1 / 8f, getFramesRange(allFrames, 1, 8));
         stateTime = 0.0f;
+        Gdx.app.log(TAG, "WOOOOHOOO IM FUCKING UP THE CODE");
     }
 
     @Override
