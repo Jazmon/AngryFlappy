@@ -28,7 +28,7 @@ public class Doge {
     private Array<TextureRegion> allFrames;
     private float stateTime;
     private TextureRegion currentFrame;
-    private final float SPEED_PLUS = 80.0f;
+    private final float SPEED_PLUS = 100.0f;
     private boolean moving;
 
 
@@ -46,7 +46,7 @@ public class Doge {
         stopped = allFrames.first();
         currentFrame = stopped;
         scale = new Vector2(2, 2);
-        friction = new Vector2(80.0f, 0);
+        friction = new Vector2(120.0f, 0);
         moving = false;
     }
 
@@ -73,51 +73,24 @@ public class Doge {
 
     public void draw(SpriteBatch batch) {
         boolean flip = false;
+
         if (isMoving()) {
             stateTime += Gdx.graphics.getDeltaTime();
             currentFrame = running.getKeyFrame(stateTime, true);
-
-            if (isFacingLeft()) {
-                //currentFrame.flip(true,false);
-                flip = true;}
-
         } else {
             currentFrame = stopped;
         }
 
-        batch.draw(currentFrame.getTexture(),       // Texture
-                bounds.x, bounds.y,                 // x, y
-                currentFrame.getTexture().getWidth() / 2, currentFrame.getTexture().getHeight() / 2,    // originX, originY
-                bounds.getWidth(), bounds.getHeight(),  // width, height
-                scale.x, scale.y,                   // scaleX, scaleY
-                0,                                  // rotation
-                0, 0,                               // srcX, srcY
-                currentFrame.getRegionWidth(), currentFrame.getRegionHeight(),
-                isFacingLeft(), false
-        );
+        if (isFacingLeft())
+            flip = true;
 
-        batch.draw(currentFrame, 0, 0);
-        // currentFrame, flip ? x+width : x, y, flip ? -width : width, height
-       /* batch.draw(currentFrame,
-                flip ? bounds.x + bounds.width : bounds.x, bounds.y,
-                bounds.width / 2, bounds.height / 2,
-                flip ? -bounds.width : bounds.width, bounds.height,
-                scale.x, scale.y,
-                0, false
-        );*/
         batch.draw(currentFrame,
                 flip ? bounds.x + bounds.width : bounds.x, bounds.y,
                 bounds.width / 2, bounds.height / 2,
                 flip ? -bounds.width : bounds.width, bounds.height,
-                scale.x, scale.y,0);
-       /*batch.draw(currentFrame,
-                bounds.x, bounds.y,
-                bounds.width / 2, bounds.height / 2,
-                bounds.width, bounds.height,
                 scale.x, scale.y,
-                0, false
-        );*/
-       // currentFrame.flip(false,false);
+                0
+        );
     }
 
     public boolean isMoving() {

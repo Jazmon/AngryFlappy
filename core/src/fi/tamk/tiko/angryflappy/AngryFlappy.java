@@ -3,9 +3,11 @@ package fi.tamk.tiko.angryflappy;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
@@ -17,6 +19,8 @@ public class AngryFlappy extends ApplicationAdapter {
     private Doge doge;
     private InputHandler inputHandler;
     private BitmapFont font;
+    private Texture background;
+    private Music music;
 
 
     @Override
@@ -34,6 +38,10 @@ public class AngryFlappy extends ApplicationAdapter {
         font = new BitmapFont();
         font.setScale(1.50f, 1.50f);
         font.setColor(Color.BLUE);
+        background = new Texture("background.jpg");
+        music = Gdx.audio.newMusic(Gdx.files.internal("music/DogeMusic.mp3"));
+        music.setLooping(true);
+        music.play();
 
     }
 
@@ -47,6 +55,7 @@ public class AngryFlappy extends ApplicationAdapter {
 
         doge.update(deltaTime);
         batch.begin();
+        batch.draw(background, -Constants.VIEWPORT_WIDTH / 2,-Constants.VIEWPORT_HEIGHT / 2, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
         doge.draw(batch);
         font.draw(batch, "Speed.x:" + doge.getSpeed().x /*+ ", speedY: " + doge.getSpeed().y*/, -Constants.VIEWPORT_WIDTH / 2 + 30, -Constants.VIEWPORT_HEIGHT / 2 + 30);
         batch.end();
