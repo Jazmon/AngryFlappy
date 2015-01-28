@@ -32,7 +32,7 @@ public class AngryFlappy extends ApplicationAdapter {
         inputHandler = new InputHandler(doge);
         Gdx.input.setInputProcessor(inputHandler);
         font = new BitmapFont();
-        font.setScale(2.0f, 2.0f);
+        font.setScale(1.50f, 1.50f);
         font.setColor(Color.BLUE);
 
     }
@@ -47,8 +47,8 @@ public class AngryFlappy extends ApplicationAdapter {
 
         doge.update(deltaTime);
         batch.begin();
-        doge.draw(batch, deltaTime);
-        font.draw(batch, "speedX: " + doge.getSpeed().x + ", speedY: " + doge.getSpeed().y, 0, 0);
+        doge.draw(batch);
+        font.draw(batch, "Speed.x:" + doge.getSpeed().x /*+ ", speedY: " + doge.getSpeed().y*/, -Constants.VIEWPORT_WIDTH / 2 + 30, -Constants.VIEWPORT_HEIGHT / 2 + 30);
         batch.end();
     }
 

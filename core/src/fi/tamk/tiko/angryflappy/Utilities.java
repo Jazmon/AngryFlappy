@@ -23,7 +23,7 @@ public class Utilities {
             }
         }
 
-        Gdx.app.debug(TAG, counter + " frames added");
+        Gdx.app.debug(TAG, counter + " frames added to 1D TextureRegion array");
 
         return array;
     }
@@ -33,11 +33,13 @@ public class Utilities {
         int counter = 0;
 
         for(int i = first; i <= last; i++) {
-            if(frames.get(i) != null)
+            if(frames.get(i) != null) {
                 tmp.add(frames.get(i));
+                counter++;
+            }
         }
 
-        Gdx.app.debug(TAG, counter + " frames added");
+        Gdx.app.debug(TAG, "got " + counter + " frames out of " + (last - first + 1));
 
         return tmp;
     }

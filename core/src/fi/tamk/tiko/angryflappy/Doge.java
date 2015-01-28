@@ -28,7 +28,8 @@ public class Doge {
     private Array<TextureRegion> allFrames;
     private float stateTime;
     private TextureRegion currentFrame;
-    private final float SPEED_REDUCTION =4.0f;
+    private final float SPEED_PLUS = 80.0f;
+    private boolean moving;
 
 
     public Doge() {
@@ -40,54 +41,49 @@ public class Doge {
         allFrames = Utilities.to1DArray(tmp);
         running = new Animation(1 / 8f, Utilities.getFramesRange(allFrames, 1, 8));
         stateTime = 0.0f;
-        bounds = new Rectangle(0,0,dogesheet.getWidth() / FRAME_COLS,dogesheet.getHeight() / FRAME_ROWS );
-        speed = new Vector2(0,0);
+        bounds = new Rectangle(0, 0, dogesheet.getWidth() / FRAME_COLS, dogesheet.getHeight() / FRAME_ROWS);
+        speed = new Vector2(0, 0);
         stopped = allFrames.first();
         currentFrame = stopped;
-        scale = new Vector2(2,2);
-        friction = new Vector2(12.0f, 0);
+        scale = new Vector2(2, 2);
+        friction = new Vector2(80.0f, 0);
+        moving = false;
     }
 
     public void update(float deltaTime) {
-        updateMotionX(deltaTime);
         // move to new position
         bounds.x += speed.x * deltaTime;
         bounds.y += speed.y * deltaTime;
+
+        if (!moving) {
+            updateMotionX(deltaTime);
+        }
     }
 
     private void updateMotionX(float deltaTime) {
-        if(speed.x != 0) {
+        if (speed.x != 0) {
             // Apply friction
-            if(speed.x > 0) {
+            if (speed.x > 0) {
                 speed.x = Math.max(speed.x - friction.x * deltaTime, 0);
             } else {
                 speed.x = Math.min(speed.x + friction.x * deltaTime, 0);
             }
         }
-
-        // apply acceleration
-        //speed.x += acceleration.
     }
 
-    public void draw(SpriteBatch batch, float deltaTime) {
-        stateTime += deltaTime;
-        if(isMoving()) {
+    public void draw(SpriteBatch batch) {
+        boolean flip = false;
+        if (isMoving()) {
+            stateTime += Gdx.graphics.getDeltaTime();
             currentFrame = running.getKeyFrame(stateTime, true);
-            if(isFacingLeft()) {
-                currentFrame.flip(true, false);
-            } else {
-                currentFrame.flip(false, false);
-            }
+
+            if (isFacingLeft()) {
+                //currentFrame.flip(true,false);
+                flip = true;}
+
         } else {
             currentFrame = stopped;
         }
-       // currentFrame = stopped;
-       /* batch.draw(currentFrame.getTexture(),        // texture
-                bounds.x, bounds.y,     // x, y
-                currentFrame.getRegionWidth() / 2, currentFrame.getRegionHeight() / 2,  // originX, originY
-                bounds.getWidth(), bounds.getHeight(),          // width, height
-                scale.x, scale.y,                   // scaleX, scaleY
-                0);        */             // rotation
 
         batch.draw(currentFrame.getTexture(),       // Texture
                 bounds.x, bounds.y,                 // x, y
@@ -97,45 +93,35 @@ public class Doge {
                 0,                                  // rotation
                 0, 0,                               // srcX, srcY
                 currentFrame.getRegionWidth(), currentFrame.getRegionHeight(),
-                isFacingLeft(), false);
+                isFacingLeft(), false
+        );
+
+        batch.draw(currentFrame, 0, 0);
+        // currentFrame, flip ? x+width : x, y, flip ? -width : width, height
+       /* batch.draw(currentFrame,
+                flip ? bounds.x + bounds.width : bounds.x, bounds.y,
+                bounds.width / 2, bounds.height / 2,
+                flip ? -bounds.width : bounds.width, bounds.height,
+                scale.x, scale.y,
+                0, false
+        );*/
+        batch.draw(currentFrame,
+                flip ? bounds.x + bounds.width : bounds.x, bounds.y,
+                bounds.width / 2, bounds.height / 2,
+                flip ? -bounds.width : bounds.width, bounds.height,
+                scale.x, scale.y,0);
+       /*batch.draw(currentFrame,
+                bounds.x, bounds.y,
+                bounds.width / 2, bounds.height / 2,
+                bounds.width, bounds.height,
+                scale.x, scale.y,
+                0, false
+        );*/
+       // currentFrame.flip(false,false);
     }
 
-   /* public void move(float deltaTime) {
-        bounds.x += speed.x * deltaTime;
-        bounds.y += speed.y * deltaTime;
-
-        reduceSpeed();
-
-        //currentFrame.setRegion(bounds.x, bounds.y, bounds.width, bounds.height);
-        Gdx.app.debug(TAG, "moving");
-    }*/
-
-   /* private void reduceSpeed() {
-        if (speed.x > 0) {
-            speed.x -= SPEED_REDUCTION;
-        } else if (speed.x < 0) {
-            speed.x += SPEED_REDUCTION;
-        }
-
-        if (speed.y > 0) {
-            speed.y -= SPEED_REDUCTION;
-        } else if (speed.y < 0) {
-            speed.y += SPEED_REDUCTION;
-        }
-
-        if(speed.x < 2 && speed.x > 0)
-            speed.x = 0;
-
-        if(speed.x > - 2 && speed.x < 0)
-            speed.x = 0;
-
-        Gdx.app.debug(TAG, "reducing speed");
-    }*/
-
     public boolean isMoving() {
-        if (speed.x > 0 || speed.y > 0)
-            return true;
-        return false;
+        return speed.x != 0;
     }
 
     public boolean isFacingLeft() {
@@ -143,37 +129,24 @@ public class Doge {
     }
 
     public void moveLeft() {
-        speed.x = -20f;
+        speed.x = -SPEED_PLUS;
         facingLeft = true;
+        moving = true;
         Gdx.app.debug(TAG, "moveLeft()");
     }
 
     public void moveRight() {
-        speed.x = 20f;
+        speed.x = SPEED_PLUS;
         facingLeft = false;
+        moving = true;
         Gdx.app.debug(TAG, "moveRight()");
     }
 
     public void onStopMoving() {
-    }
-
-    public void setFacingLeft(boolean facingLeft) {
-        this.facingLeft = facingLeft;
+        moving = false;
     }
 
     public Vector2 getSpeed() {
         return speed;
-    }
-
-    public void setSpeed(Vector2 speed) {
-        this.speed = speed;
-    }
-
-    public Rectangle getBounds() {
-        return bounds;
-    }
-
-    public void setBounds(Rectangle bounds) {
-        this.bounds = bounds;
     }
 }

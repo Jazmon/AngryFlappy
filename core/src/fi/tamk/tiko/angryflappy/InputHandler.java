@@ -12,25 +12,31 @@ import com.badlogic.gdx.InputProcessor;
 public class InputHandler implements InputProcessor {
     public static final String TAG = InputHandler.class.getName();
     private Doge doge;
+    private boolean directionKeyPressed;
+
     public InputHandler(Doge doge) {
         this.doge = doge;
+        directionKeyPressed = false;
     }
+
     @Override
     public boolean keyDown(int keycode) {
         switch (keycode) {
-            case Input.Keys.A :
+            case Input.Keys.A:
             case Input.Keys.LEFT:
-                doge.moveLeft();
-                Gdx.app.debug(TAG, "LEFT");
-
+                if (!directionKeyPressed) {
+                    directionKeyPressed = true;
+                    doge.moveLeft();
+                    Gdx.app.debug(TAG, "LEFT");
+                }
                 break;
-            case Input.Keys.D :
+            case Input.Keys.D:
             case Input.Keys.RIGHT:
-                doge.moveRight();
-                Gdx.app.debug(TAG, "RIGHT");
-                break;
-            case Input.Keys.ESCAPE:
-                Gdx.app.exit();
+                if (!directionKeyPressed) {
+                    directionKeyPressed = true;
+                    doge.moveRight();
+                    Gdx.app.debug(TAG, "RIGHT");
+                }
                 break;
         }
         return false;
@@ -38,6 +44,24 @@ public class InputHandler implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
+        switch (keycode) {
+            case Input.Keys.A:
+            case Input.Keys.LEFT:
+                directionKeyPressed = false;
+                doge.onStopMoving();
+                Gdx.app.debug(TAG, "stop LEFT");
+
+                break;
+            case Input.Keys.D:
+            case Input.Keys.RIGHT:
+                directionKeyPressed = false;
+                doge.onStopMoving();
+                Gdx.app.debug(TAG, "stop RIGHT");
+                break;
+            case Input.Keys.ESCAPE:
+                Gdx.app.exit();
+                break;
+        }
         return false;
     }
 
