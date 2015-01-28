@@ -1,5 +1,6 @@
 package fi.tamk.tiko.angryflappy;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 
@@ -9,6 +10,7 @@ import com.badlogic.gdx.InputProcessor;
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
 public class InputHandler implements InputProcessor {
+    public static final String TAG = InputHandler.class.getName();
     private Doge doge;
     public InputHandler(Doge doge) {
         this.doge = doge;
@@ -18,7 +20,18 @@ public class InputHandler implements InputProcessor {
         switch (keycode) {
             case Input.Keys.A :
             case Input.Keys.LEFT:
+                doge.moveLeft();
+                Gdx.app.debug(TAG, "LEFT");
 
+                break;
+            case Input.Keys.D :
+            case Input.Keys.RIGHT:
+                doge.moveRight();
+                Gdx.app.debug(TAG, "RIGHT");
+                break;
+            case Input.Keys.ESCAPE:
+                Gdx.app.exit();
+                break;
         }
         return false;
     }
