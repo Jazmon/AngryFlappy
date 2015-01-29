@@ -3,6 +3,9 @@ package fi.tamk.tiko.angryflappy;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 
 /**
  * Created by Atte Huhtakangas on 27.1.2015 23:45.
@@ -13,10 +16,15 @@ public class InputHandler implements InputProcessor {
     public static final String TAG = InputHandler.class.getName();
     private Doge doge;
     private boolean directionKeyPressed;
+    private OrthographicCamera camera;
+    private Array<Integer> pointers;
+    private Vector3 touchpos;
 
-    public InputHandler(Doge doge) {
+    public InputHandler(Doge doge, OrthographicCamera camera) {
         this.doge = doge;
         directionKeyPressed = false;
+        this.camera = camera;
+        touchpos = new Vector3();
     }
 
     @Override
@@ -62,7 +70,7 @@ public class InputHandler implements InputProcessor {
                 Gdx.app.exit();
                 break;
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -72,12 +80,25 @@ public class InputHandler implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        return false;
+        touchpos.set(screenX, screenY, 0);
+        touchpos = camera.unproject(touchpos);
+
+        if(touchpos.x <= 0 && touchpos.y < 0) {
+            doge.moveLeft();
+        } else if(touchpos.x > 0 && touchpos.y < 0) {
+            doge.moveRight();
+        }
+
+        if(touchpos.y <= 0)
+            doge.shoot();
+        return true;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        return false;
+        doge.onStopMoving();
+        doge.stopShooting();
+        return true;
     }
 
     @Override
@@ -93,5 +114,9 @@ public class InputHandler implements InputProcessor {
     @Override
     public boolean scrolled(int amount) {
         return false;
+    }
+
+    public Vector3 getTouchpos() {
+        return touchpos;
     }
 }

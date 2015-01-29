@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -14,42 +12,68 @@ import com.badlogic.gdx.utils.Array;
  * -
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
-public class Doge {
-    public static final String TAG = Doge.class.getName();
+public class Doge extends GameObject {
     private Animation running;
-    private TextureRegion stopped;
+    private Animation shoot;
     private boolean facingLeft;
-    private Rectangle bounds;
-    private Vector2 speed;
-    private Vector2 scale;
-    private Vector2 friction;
     private final int FRAME_COLS = 10;
     private final int FRAME_ROWS = 2;
     private Array<TextureRegion> allFrames;
+    private Array<TextureRegion> frames2;
     private float stateTime;
     private TextureRegion currentFrame;
-    private final float SPEED_PLUS = 100.0f;
-    private boolean moving;
-
+    private boolean isShooting;
 
     public Doge() {
-        Texture dogesheet = new Texture("dogesheet2.png");
+        super();
+
+        // Setup first batch of frames
+        /*Texture dogesheet = new Texture("dogesheet.png");
         dogesheet.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         int tileWidth = dogesheet.getWidth() / FRAME_COLS;
         int tileHeight = dogesheet.getHeight() / FRAME_ROWS;
         TextureRegion[][] tmp = TextureRegion.split(dogesheet, tileWidth, tileHeight);
         allFrames = Utilities.to1DArray(tmp);
-        running = new Animation(1 / 8f, Utilities.getFramesRange(allFrames, 1, 8));
+        running = new Animation(1 / 10f, Utilities.getFramesRange(allFrames, 1, 8));
+        Texture dogesheet2 = new Texture("dogesheet2.png");
+        dogesheet2.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        tileWidth = dogesheet2.getWidth() / 12;
+        tileHeight = dogesheet2.getHeight() / 2;
+        tmp = TextureRegion.split(dogesheet2, tileWidth, tileHeight);
+        frames2 = Utilities.to1DArray(tmp);
+        shoot = new Animation(1 / 12f, Utilities.getFramesRange(frames2, 12,23));
+        */
+        allFrames = new Array<TextureRegion>();
+        running = setAnimation("dogesheet.png", 10, 2, 1 / 10f, 1, 8);
+        shoot = setAnimation("dogesheet2.png", 12, 2, 1 / 12f, 12, 23);
+
+
         stateTime = 0.0f;
-        bounds = new Rectangle(0, 0, dogesheet.getWidth() / FRAME_COLS, dogesheet.getHeight() / FRAME_ROWS);
-        speed = new Vector2(0, 0);
-        stopped = allFrames.first();
-        currentFrame = stopped;
-        scale = new Vector2(2, 2);
-        friction = new Vector2(120.0f, 0);
-        moving = false;
+        isShooting = false;
+        speed.set(0, 0);
+        defaultTextureReg = allFrames.first();
+        currentFrame = defaultTextureReg;
+        scale.set(2.0f, 2.0f);
+        friction.set(120.0f, 0);
+        //bounds = new Rectangle(0, 0, dogesheet.getWidth() / FRAME_COLS, dogesheet.getHeight() / FRAME_ROWS);
+        bounds.set(0,0,defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
     }
 
+    private Animation setAnimation(String textureFileName, int frameCols, int frameRows, float animDelay, int framesStart, int framesEnd) {
+        Texture textureSheet = new Texture(textureFileName);
+        textureSheet.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        int tileWidth = textureSheet.getWidth() / frameCols;
+        int tileHeight = textureSheet.getHeight() / frameRows;
+        TextureRegion[][] tmp = TextureRegion.split(textureSheet, tileWidth, tileHeight);
+        Array<TextureRegion> frames = Utilities.to1DArray(tmp);
+        allFrames.addAll(frames);
+        Gdx.app.debug(getTag(), "allframes.size:" + allFrames.size);
+        return new Animation(animDelay,Utilities.getFramesRange(frames,framesStart, framesEnd));
+    }
+
+
+    @Override
     public void update(float deltaTime) {
         // move to new position
         bounds.x += speed.x * deltaTime;
@@ -60,30 +84,23 @@ public class Doge {
         }
     }
 
-    private void updateMotionX(float deltaTime) {
-        if (speed.x != 0) {
-            // Apply friction
-            if (speed.x > 0) {
-                speed.x = Math.max(speed.x - friction.x * deltaTime, 0);
-            } else {
-                speed.x = Math.min(speed.x + friction.x * deltaTime, 0);
-            }
-        }
-    }
-
+    @Override
     public void draw(SpriteBatch batch) {
         boolean flip = false;
-
+        stateTime += Gdx.graphics.getDeltaTime();
         if (isMoving()) {
-            stateTime += Gdx.graphics.getDeltaTime();
+            //stateTime += Gdx.graphics.getDeltaTime();
             currentFrame = running.getKeyFrame(stateTime, true);
         } else {
-            currentFrame = stopped;
+            currentFrame = defaultTextureReg;
         }
 
         if (isFacingLeft())
             flip = true;
 
+        if (isShooting) {
+            currentFrame = shoot.getKeyFrame(stateTime, true);
+        }
         batch.draw(currentFrame,
                 flip ? bounds.x + bounds.width : bounds.x, bounds.y,
                 bounds.width / 2, bounds.height / 2,
@@ -91,6 +108,14 @@ public class Doge {
                 scale.x, scale.y,
                 0
         );
+    }
+
+    public void shoot() {
+        isShooting = true;
+    }
+
+    public void stopShooting() {
+        isShooting = false;
     }
 
     public boolean isMoving() {
@@ -101,25 +126,20 @@ public class Doge {
         return facingLeft;
     }
 
+    @Override
     public void moveLeft() {
-        speed.x = -SPEED_PLUS;
+        super.moveLeft();
         facingLeft = true;
-        moving = true;
-        Gdx.app.debug(TAG, "moveLeft()");
     }
 
+    @Override
     public void moveRight() {
-        speed.x = SPEED_PLUS;
+        super.moveRight();
         facingLeft = false;
-        moving = true;
-        Gdx.app.debug(TAG, "moveRight()");
     }
 
-    public void onStopMoving() {
-        moving = false;
-    }
-
-    public Vector2 getSpeed() {
-        return speed;
+    @Override
+    public String getTag() {
+        return Doge.class.getName();
     }
 }
