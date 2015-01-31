@@ -2,6 +2,7 @@ package fi.tamk.tiko.angryflappy;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
@@ -10,9 +11,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.Array;
 
 
-public class AngryFlappy extends ApplicationAdapter {
+public class AngryFlappy implements ApplicationListener {
     public static final String TAG = AngryFlappy.class.getName();
     private SpriteBatch batch;
     private OrthographicCamera camera;
@@ -21,6 +23,9 @@ public class AngryFlappy extends ApplicationAdapter {
     private BitmapFont font;
     private Texture background;
     private Music music;
+    //private Array<Wow> wows;
+    //private Enemy enemy;
+    private Array<Enemy> enemies;
 
 
     @Override
@@ -42,7 +47,44 @@ public class AngryFlappy extends ApplicationAdapter {
         music = Gdx.audio.newMusic(Gdx.files.internal("music/DogeMusic.mp3"));
         music.setLooping(true);
         music.play();
+        //wows = new Array<Wow>();
+        enemies = new Array<Enemy>();
 
+        for (int i = 0; i < 5; i++) {
+            enemies.add(new Enemy());
+        }
+
+        //enemy = new Enemy();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+
+    }
+
+    private void checkCollision(){
+        // check if enemy hits doge
+        for(Enemy enemy : enemies) {
+            if(enemy.getBounds().overlaps(doge.getBounds())) {
+                doge.die();
+            }
+        }
+        // check if wow hits bird
+        for(Wow wow : doge.getWows()) {
+            if(wow.getBounds().overlaps(doge.getBounds())) {
+                doge.die();
+                wow.die();
+            }
+        }
+        // check if projectile hits doge
+        for(Enemy enemy : enemies) {
+            for(Projectile projectile : enemy.getProjectiles()) {
+                if(projectile.getBounds().overlaps(doge.getBounds())) {
+                    doge.die();
+                    projectile.die();
+                }
+            }
+        }
     }
 
     @Override
@@ -50,16 +92,62 @@ public class AngryFlappy extends ApplicationAdapter {
         batch.setProjectionMatrix(camera.combined);
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        if(!doge.isAlive()) {
+            batch.begin();
+            batch.draw(background, -Constants.VIEWPORT_WIDTH / 2, -Constants.VIEWPORT_HEIGHT / 2, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
+            font.setScale(3.0f, 3.0f);
+            font.draw(batch, "GAME OVER", 0,0);
+            batch.end();
+            return;
+        }
 
         float deltaTime = Gdx.graphics.getDeltaTime();
 
+        // remove dead
+        for(int i = 0; i < enemies.size; i++) {
+            if(!enemies.get(i).isAlive()) {
+                enemies.get(i).dispose();
+                enemies.removeIndex(i);
+            }
+        }
+
+        checkCollision();
         doge.update(deltaTime);
+        //enemy.update(deltaTime);
+        for(Enemy enemy : enemies)
+            enemy.update(deltaTime);
+
         batch.begin();
-        batch.draw(background, -Constants.VIEWPORT_WIDTH / 2,-Constants.VIEWPORT_HEIGHT / 2, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
+        batch.draw(background, -Constants.VIEWPORT_WIDTH / 2, -Constants.VIEWPORT_HEIGHT / 2, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
         doge.draw(batch);
+        //enemy.draw(batch);
+        for(Enemy enemy : enemies)
+            enemy.draw(batch);
+
         font.draw(batch, "Speed.x:" + doge.getSpeed().x /*+ ", speedY: " + doge.getSpeed().y*/, -Constants.VIEWPORT_WIDTH / 2 + 30, -Constants.VIEWPORT_HEIGHT / 2 + 30);
         font.draw(batch, "touchpos.x: " + inputHandler.getTouchpos().x + ", y: " + inputHandler.getTouchpos().y, Constants.VIEWPORT_WIDTH / 2 - 600, Constants.VIEWPORT_HEIGHT / 2 - 30);
-                batch.end();
+        batch.end();
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void dispose() {
+        batch.dispose();
+        doge.dispose();
+        for(Enemy enemy : enemies) {
+            enemy.dispose();
+        }
+        enemies.clear();
+        enemies = null;
     }
 
 

@@ -24,6 +24,12 @@ public class Doge extends GameObject {
     private TextureRegion currentFrame;
     private boolean isShooting;
 
+    public Array<Wow> getWows() {
+        return wows;
+    }
+
+    private Array<Wow> wows;
+
     public Doge() {
         super();
 
@@ -54,9 +60,22 @@ public class Doge extends GameObject {
         defaultTextureReg = allFrames.first();
         currentFrame = defaultTextureReg;
         scale.set(2.0f, 2.0f);
-        friction.set(120.0f, 0);
+        friction.set(120.0f, 200.0f);
         //bounds = new Rectangle(0, 0, dogesheet.getWidth() / FRAME_COLS, dogesheet.getHeight() / FRAME_ROWS);
-        bounds.set(0,0,defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
+        bounds.set(-Constants.VIEWPORT_WIDTH / 2 + 100, - Constants.VIEWPORT_HEIGHT / 2 +100,defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
+        wows = new Array<Wow>();
+    }
+
+    @Override
+    public void dispose() {
+        defaultTextureReg.getTexture().dispose();
+        allFrames.clear();
+        allFrames = null;
+        for(Wow wow : wows) {
+            wow.dispose();
+        }
+        wows.clear();
+        wows = null;
     }
 
     private Animation setAnimation(String textureFileName, int frameCols, int frameRows, float animDelay, int framesStart, int framesEnd) {
@@ -81,6 +100,53 @@ public class Doge extends GameObject {
 
         if (!moving) {
             updateMotionX(deltaTime);
+            updateMotionY(deltaTime);
+        }
+
+        updateWows(deltaTime);
+        checkCollision();
+
+        removeDeadWows();
+    }
+
+    private void removeDeadWows() {
+        for (int i = 0; i < wows.size; i++) {
+            if(!wows.get(i).isAlive()) {
+                wows.get(i).dispose();
+                wows.removeIndex(i);
+            }
+        }
+    }
+
+
+    @Override
+    protected void checkCollision() {
+        if (bounds.x + bounds.width + speed.x / 4 >= Constants.VIEWPORT_WIDTH / 2) {
+            speed.set(0, speed.y);
+            // Gdx.app.debug(getTag(), "COLLIDE");
+        } else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
+            speed.set(0, speed.y);
+            // Gdx.app.debug(getTag(), "COLLIDE");
+        }
+
+        if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
+            speed.set(speed.x, -speed.y);
+        } else if (bounds.y + speed.y / 4 <= -Constants.VIEWPORT_HEIGHT / 2) {
+            speed.set(speed.x, -speed.y);
+        }
+    }
+
+    private void updateWows(float deltaTime) {
+        for(Wow wow : wows) {
+            if(wow != null)
+                wow.update(deltaTime);
+        }
+    }
+
+    private void drawWows(SpriteBatch batch) {
+        for(Wow wow: wows) {
+            if(wow != null)
+                wow.draw(batch);
         }
     }
 
@@ -108,10 +174,16 @@ public class Doge extends GameObject {
                 scale.x, scale.y,
                 0
         );
+
+        drawWows(batch);
     }
 
     public void shoot() {
         isShooting = true;
+        float posX = facingLeft ? bounds.x - bounds.width / 2 : bounds.x + bounds.width / 2;
+        float posY = bounds.y + bounds.height;
+        Wow wow = new Wow(posX, posY);
+        wows.add(wow);
     }
 
     public void stopShooting() {
@@ -141,5 +213,9 @@ public class Doge extends GameObject {
     @Override
     public String getTag() {
         return Doge.class.getName();
+    }
+
+    public void jump() {
+        speed.y += 150.0f;
     }
 }
