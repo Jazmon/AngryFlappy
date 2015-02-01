@@ -1,5 +1,6 @@
 package fi.tamk.tiko.angryflappy;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -29,7 +30,13 @@ public class Projectile extends GameObject implements Disposable{
 
     @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(defaultTextureReg, bounds.x, bounds.y, bounds.width / 2, bounds.height / 2, bounds.width, bounds.height, scale.x, scale.y, rotation);
+        batch.draw(defaultTextureReg,
+                bounds.x, bounds.y,
+                bounds.width / 2, bounds.height / 2,
+                bounds.width, bounds.height,
+                scale.x, scale.y,
+                rotation
+        );
     }
 
     @Override
@@ -41,6 +48,7 @@ public class Projectile extends GameObject implements Disposable{
             updateMotionX(deltaTime);
             updateMotionY(deltaTime);
         }
+
         checkCollision();
         rotate();
     }
@@ -51,7 +59,8 @@ public class Projectile extends GameObject implements Disposable{
 
     @Override
     protected void checkCollision() {
-        if (bounds.x + bounds.width + speed.x / 4 >= Constants.VIEWPORT_WIDTH / 2) {
+        if (bounds.x + bounds.width + speed.x / 4 >=
+                Constants.VIEWPORT_WIDTH / 2) {
             alive = false;
             // Gdx.app.debug(getTag(), "COLLIDE");
         } else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
@@ -59,7 +68,8 @@ public class Projectile extends GameObject implements Disposable{
             // Gdx.app.debug(getTag(), "COLLIDE");
         }
 
-        if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
+        if (bounds.y + bounds.height + speed.x / 4 >=
+                Constants.VIEWPORT_HEIGHT / 2) {
             alive = false;
         } else if (bounds.y + speed.y / 4 <= -Constants.VIEWPORT_HEIGHT / 2) {
             alive = false;
@@ -67,12 +77,18 @@ public class Projectile extends GameObject implements Disposable{
     }
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public String getTag() {
-        return null;
+        return Projectile.class.getName();
     }
 
     @Override
     public void dispose() {
         defaultTextureReg.getTexture().dispose();
+        Gdx.app.debug(getTag(), "disposed");
     }
 }

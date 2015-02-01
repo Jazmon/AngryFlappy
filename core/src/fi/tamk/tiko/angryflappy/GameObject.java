@@ -41,6 +41,7 @@ public abstract class GameObject implements Disposable {
 
     public abstract void draw(SpriteBatch batch);
     public abstract void update(float deltaTime);
+    public abstract void init();
 
     protected void updateMotionX(float deltaTime) {
         if (speed.x != 0) {

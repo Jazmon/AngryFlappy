@@ -80,9 +80,14 @@ public class Enemy extends GameObject implements Disposable {
         //rotation += 1.0f;
     }
 
+    @Override
+    public void init() {
+
+    }
+
     private void shoot() {
         //Gdx.app.debug(getTag(), "dT: " +TimeUtils.timeSinceMillis(TimeUtils.millis() - prevShotTime));
-        if (TimeUtils.timeSinceMillis(prevShotTime) >= 1500) {
+        if (TimeUtils.timeSinceMillis(prevShotTime) >= MathUtils.random(1500f,3000f)) {
             prevShotTime = TimeUtils.millis();
             projectiles.add(new Projectile(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
         }
@@ -120,5 +125,6 @@ public class Enemy extends GameObject implements Disposable {
 
         projectiles.clear();
         projectiles = null;
+        Gdx.app.debug(getTag(), "disposed");
     }
 }

@@ -1,5 +1,6 @@
 package fi.tamk.tiko.angryflappy;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -10,6 +11,8 @@ import com.badlogic.gdx.math.Vector2;
  * -
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
+
+// TODO: projectile speed and arch dependant on fling gesture's distance
 public class Wow extends GameObject{
 
     private boolean goBigger;
@@ -17,8 +20,14 @@ public class Wow extends GameObject{
     private final Vector2 scaleMin = new Vector2(0.9f, 0.9f);
 
     @Override
+    public void init() {
+
+    }
+
+    @Override
     public void dispose() {
         defaultTextureReg.getTexture().dispose();
+        Gdx.app.debug(getTag(), "disposed");
     }
 
     public Wow(float x, float y) {

@@ -12,6 +12,8 @@ import com.badlogic.gdx.utils.Array;
  * -
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
+
+// TODO: GestureHandler for flinging
 public class InputHandler implements InputProcessor {
     public static final String TAG = InputHandler.class.getName();
     private Doge doge;
