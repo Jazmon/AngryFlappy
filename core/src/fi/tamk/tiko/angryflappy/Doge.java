@@ -25,7 +25,13 @@ public class Doge extends GameObject {
     private Ground ground;
 
     private Array<Wow> wows;
+
+    public boolean isInAir() {
+        return isInAir;
+    }
+
     private boolean isInAir;
+    private float gravity;
 
     public Doge(Ground ground) {
         super();
@@ -43,13 +49,14 @@ public class Doge extends GameObject {
         lives = 5;
         stateTime = 0.0f;
         isShooting = false;
-        speed.set(0, -100f);
+        speed.set(0, 0);
         currentFrame = defaultTextureReg;
         scale.set(2.0f, 2.0f);
         friction.set(120.0f, 200.0f);
         wows = new Array<Wow>();
         alive = true;
         isInAir = false;
+        gravity = 4f;
     }
 
     @Override
@@ -82,6 +89,8 @@ public class Doge extends GameObject {
         return new Animation(animDelay, Utilities.getFramesRange(frames, framesStart, framesEnd));
     }
 
+
+    // TODO: flip rectangle as well!
     @Override
     public void update(float deltaTime) {
         // move to new position
@@ -89,6 +98,18 @@ public class Doge extends GameObject {
         bounds.y += speed.y * deltaTime;
 
         // TODO: HAndling jumping better!
+        if(isInAir) {
+            if(bounds.y  > ground.getRect().y + ground.getRect().height){
+                bounds.y += speed.y * deltaTime;
+                speed.y -= gravity;
+            } else {
+                Gdx.app.debug(getTag(), "on ground");
+
+                isInAir = false;
+                bounds.y = ground.getRect().y + ground.getRect().height;
+                speed.y = 0;
+            }
+        }
         //if(bounds.y + speedX > 0)
 
         if (!moving) {
@@ -103,23 +124,27 @@ public class Doge extends GameObject {
 
     @Override
     protected void checkCollision() {
+        // if hit right wall
         if (bounds.x + bounds.width + speed.x / 4 >= Constants.VIEWPORT_WIDTH / 2) {
             speed.set(0, speed.y);
             // Gdx.app.debug(getTag(), "COLLIDE");
-        } else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
+        }
+        // if hit left wall
+        else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
             speed.set(0, speed.y);
             // Gdx.app.debug(getTag(), "COLLIDE");
         }
 
-        if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
+        // if hit ceiling
+        /*if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
             speed.set(speed.x, -speed.y);
         } else if (bounds.y + speed.y / 4 <= -Constants.VIEWPORT_HEIGHT / 2) {
-            speed.set(speed.x, -speed.y);
-        }
-
-        if (bounds.y <= (ground.getRect().y + ground.getRect().height)) {
             speed.set(speed.x, 0);
-        }
+        }*/
+        // if hit floor
+        //if (bounds.y <= (ground.getRect().y + ground.getRect().height)) {
+         //   speed.set(speed.x, 0);
+        //}
     }
 
     private void updateWows(float deltaTime) {

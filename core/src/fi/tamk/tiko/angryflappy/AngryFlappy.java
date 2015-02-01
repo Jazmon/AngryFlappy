@@ -50,7 +50,7 @@ public class AngryFlappy implements ApplicationListener {
         background = new Texture("background.jpg");
         music = Gdx.audio.newMusic(Gdx.files.internal("music/DogeMusic.mp3"));
         music.setLooping(true);
-        music.play();
+        //music.play();
         enemies = new Array<Enemy>();
 
         for (int i = 0; i < 5; i++) {

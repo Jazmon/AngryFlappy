@@ -62,7 +62,7 @@ public class InputHandler implements InputProcessor {
             case Input.Keys.LEFT:
                 directionKeyPressed = false;
                 doge.onStopMoving();
-               // Gdx.app.debug(TAG, "stop LEFT");
+                // Gdx.app.debug(TAG, "stop LEFT");
                 break;
             case Input.Keys.D:
             case Input.Keys.RIGHT:
@@ -70,7 +70,7 @@ public class InputHandler implements InputProcessor {
                 doge.onStopMoving();
                 //Gdx.app.debug(TAG, "stop RIGHT");
                 break;
-            case Input.Keys.SPACE :
+            case Input.Keys.SPACE:
                 doge.stopShooting();
                 break;
             case Input.Keys.ESCAPE:
@@ -90,15 +90,16 @@ public class InputHandler implements InputProcessor {
         touchpos.set(screenX, screenY, 0);
         touchpos = camera.unproject(touchpos);
 
-        if(touchpos.x <= 0 && touchpos.y < 0) {
+        if (touchpos.x <= 0 && touchpos.y < 0) {
             doge.moveLeft();
-        } else if(touchpos.x > 0 && touchpos.y < 0) {
+        } else if (touchpos.x > 0 && touchpos.y < 0) {
             doge.moveRight();
         }
 
-        if(touchpos.y > 0){
+        if (touchpos.y > 0) {
             doge.shoot();
-            doge.jump();
+            if (!doge.isInAir())
+                doge.jump();
         }
         return true;
     }
