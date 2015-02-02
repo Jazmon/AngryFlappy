@@ -87,7 +87,7 @@ public class Enemy extends GameObject implements Disposable {
 
     private void shoot() {
         //Gdx.app.debug(getTag(), "dT: " +TimeUtils.timeSinceMillis(TimeUtils.millis() - prevShotTime));
-        if (TimeUtils.timeSinceMillis(prevShotTime) >= MathUtils.random(1500f,3000f)) {
+        if (TimeUtils.timeSinceMillis(prevShotTime) >= MathUtils.random(2500f,4000f)) {
             prevShotTime = TimeUtils.millis();
             projectiles.add(new Projectile(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
         }

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 
 /**
@@ -23,6 +22,7 @@ public class Doge extends GameObject {
     private boolean isShooting;
     private int lives;
     private Ground ground;
+    private boolean isPlacedLeft;
 
     private Array<Wow> wows;
 
@@ -50,6 +50,7 @@ public class Doge extends GameObject {
         stateTime = 0.0f;
         isShooting = false;
         speed.set(0, 0);
+        isPlacedLeft = false;
         currentFrame = defaultTextureReg;
         scale.set(2.0f, 2.0f);
         friction.set(120.0f, 200.0f);
@@ -89,17 +90,23 @@ public class Doge extends GameObject {
         return new Animation(animDelay, Utilities.getFramesRange(frames, framesStart, framesEnd));
     }
 
-
-    // TODO: flip rectangle as well!
     @Override
     public void update(float deltaTime) {
         // move to new position
         bounds.x += speed.x * deltaTime;
         bounds.y += speed.y * deltaTime;
 
-        // TODO: HAndling jumping better!
-        if(isInAir) {
-            if(bounds.y  > ground.getRect().y + ground.getRect().height){
+        if (isFacingLeft() && !isPlacedLeft) {
+            bounds.x -= bounds.width;
+            Gdx.app.debug(getTag(), "Moving rect to left");
+            isPlacedLeft = true;
+        } else if(!isFacingLeft() && isPlacedLeft){
+            isPlacedLeft = false;
+            bounds.x += bounds.width;
+        }
+        // TODO: Handling jumping better!
+        if (isInAir) {
+            if (bounds.y > ground.getRect().y + ground.getRect().height) {
                 bounds.y += speed.y * deltaTime;
                 speed.y -= gravity;
             } else {
@@ -143,7 +150,7 @@ public class Doge extends GameObject {
         }*/
         // if hit floor
         //if (bounds.y <= (ground.getRect().y + ground.getRect().height)) {
-         //   speed.set(speed.x, 0);
+        //   speed.set(speed.x, 0);
         //}
     }
 
@@ -180,7 +187,7 @@ public class Doge extends GameObject {
             currentFrame = shoot.getKeyFrame(stateTime, true);
         }
         batch.draw(currentFrame,
-                flip ? bounds.x + bounds.width : bounds.x, bounds.y,
+                flip ? bounds.x + 2 * bounds.width : bounds.x, bounds.y,
                 bounds.width / 2, bounds.height / 2,
                 flip ? -bounds.width : bounds.width, bounds.height,
                 scale.x, scale.y,
@@ -230,6 +237,19 @@ public class Doge extends GameObject {
                 wows.removeIndex(i);
             }
         }
+    }
+
+    @Override
+    public void die() {
+        if(lives > 0) {
+            lives--;
+        } else {
+            super.die();
+        }
+    }
+
+    public int getLives() {
+        return lives;
     }
 
     @Override

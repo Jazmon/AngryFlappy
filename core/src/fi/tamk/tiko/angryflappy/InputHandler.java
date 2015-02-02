@@ -50,6 +50,9 @@ public class InputHandler implements InputProcessor {
                 break;
             case Input.Keys.SPACE:
                 doge.shoot();
+                if(!doge.isInAir()) {
+                    doge.jump();
+                }
                 break;
         }
         return false;
@@ -74,6 +77,7 @@ public class InputHandler implements InputProcessor {
                 doge.stopShooting();
                 break;
             case Input.Keys.ESCAPE:
+                System.gc();
                 Gdx.app.exit();
                 break;
         }

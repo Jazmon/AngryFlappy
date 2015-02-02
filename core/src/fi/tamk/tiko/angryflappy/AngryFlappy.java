@@ -86,7 +86,7 @@ public class AngryFlappy implements ApplicationListener {
         for(Enemy enemy : enemies) {
             for(Projectile projectile : enemy.getProjectiles()) {
                 if(projectile.getBounds().overlaps(doge.getBounds())) {
-                   // doge.die();
+                    doge.die();
                     projectile.die();
                 }
             }
@@ -144,6 +144,7 @@ public class AngryFlappy implements ApplicationListener {
                 + ", y: " + inputHandler.getTouchpos().y,
                 Constants.VIEWPORT_WIDTH / 2 - 600,
                 Constants.VIEWPORT_HEIGHT / 2 - 30);
+        font.draw(batch,"lives: " + doge.getLives(), -Constants.VIEWPORT_WIDTH / 2 + 30, Constants.VIEWPORT_HEIGHT / 2 - 30);
         batch.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);

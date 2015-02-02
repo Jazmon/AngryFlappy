@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
 
 /**
@@ -21,7 +22,7 @@ public class Projectile extends GameObject implements Disposable{
         defaultTextureReg = new TextureRegion(texture);
         scale.set(1,1);
         moving = true;
-        speed.set(0.0f, -400.0f);
+        speed.set(0.0f, MathUtils.random(-320.0f, -380.0f));
         alive = true;
         exploded = false;
         rotation = 0.0f;
@@ -54,7 +55,7 @@ public class Projectile extends GameObject implements Disposable{
     }
 
     private void rotate() {
-        rotation += 6.0f;
+        rotation += MathUtils.random(3.0f, 7.0f);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class Projectile extends GameObject implements Disposable{
         if (bounds.y + bounds.height + speed.x / 4 >=
                 Constants.VIEWPORT_HEIGHT / 2) {
             alive = false;
-        } else if (bounds.y + speed.y / 4 <= -Constants.VIEWPORT_HEIGHT / 2) {
+        } else if (bounds.y <= -Constants.VIEWPORT_HEIGHT / 2) {
             alive = false;
         }
     }
