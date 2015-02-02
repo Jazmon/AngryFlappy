@@ -16,16 +16,13 @@ import com.badlogic.gdx.utils.TimeUtils;
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
 public class Enemy extends GameObject implements Disposable {
-
     private float rotation;
     private long prevShotTime;
-
     private boolean exploded;
     private Array<TextureRegion> explosionFrames;
     private Animation explosion;
     private float stateTime;
     private TextureRegion currentFrame;
-    private boolean facingLeft;
 
 
     public Array<Projectile> getProjectiles() {
@@ -52,29 +49,25 @@ public class Enemy extends GameObject implements Disposable {
         explosionFrames = new Array<TextureRegion>();
         currentFrame = defaultTextureReg;
         exploded = false;
-        explosion = setAnimation("explosion.png", 5, 5,1 / 25.0f, 0, 24);
+        explosion = setAnimation("explosion.png", 5, 5, 1 / 25.0f, 0, 24);
         explosion.setPlayMode(Animation.PlayMode.LOOP);
     }
 
     @Override
     public void die() {
-        if(!exploded) {
+        if (!exploded) {
             exploded = true;
-            Gdx.app.debug(getTag(), "setting exploded to true");
         } else {
-            Gdx.app.debug(getTag(), "finally calling super.die()");
             super.die();
         }
     }
 
     @Override
     public void draw(SpriteBatch batch) {
-        if(exploded) {
+        if (exploded) {
             stateTime += Gdx.graphics.getDeltaTime();
-            Gdx.app.debug(getTag(), "Is exploded,setting to expl. frames");
             currentFrame = explosion.getKeyFrame(stateTime, false);
-            if(explosion.isAnimationFinished(stateTime)) {
-                Gdx.app.debug(getTag(), "animation finished, removing");
+            if (explosion.isAnimationFinished(stateTime)) {
                 die();
             }
         }
@@ -106,9 +99,8 @@ public class Enemy extends GameObject implements Disposable {
             projectile.update(deltaTime);
 
         checkCollision();
-        rotate();
+        //rotate();
         shoot();
-
         removeDeadProjectiles();
     }
 
@@ -129,7 +121,7 @@ public class Enemy extends GameObject implements Disposable {
 
     private void removeDeadProjectiles() {
         for (int i = 0; i < projectiles.size; i++) {
-            if(!projectiles.get(i).isAlive()) {
+            if (!projectiles.get(i).isAlive()) {
                 projectiles.get(i).dispose();
                 projectiles.removeIndex(i);
             }
@@ -137,7 +129,7 @@ public class Enemy extends GameObject implements Disposable {
     }
 
     private void rotate() {
-        //rotation += 1.0f;
+        rotation += 1.0f;
     }
 
     @Override
@@ -146,8 +138,7 @@ public class Enemy extends GameObject implements Disposable {
     }
 
     private void shoot() {
-        //Gdx.app.debug(getTag(), "dT: " +TimeUtils.timeSinceMillis(TimeUtils.millis() - prevShotTime));
-        if (TimeUtils.timeSinceMillis(prevShotTime) >= MathUtils.random(2500f,4000f)) {
+        if (TimeUtils.timeSinceMillis(prevShotTime) >= MathUtils.random(2500f, 4000f)) {
             prevShotTime = TimeUtils.millis();
             projectiles.add(new Projectile(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
         }
@@ -157,10 +148,8 @@ public class Enemy extends GameObject implements Disposable {
     protected void checkCollision() {
         if (bounds.x + bounds.width + speed.x / 4 >= Constants.VIEWPORT_WIDTH / 2) {
             speed.set(-speed.x, speed.y);
-            // Gdx.app.debug(getTag(), "COLLIDE");
         } else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
             speed.set(-speed.x, speed.y);
-            // Gdx.app.debug(getTag(), "COLLIDE");
         }
 
         if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
@@ -177,28 +166,13 @@ public class Enemy extends GameObject implements Disposable {
 
     @Override
     public void dispose() {
-        for(Projectile projectile : projectiles) {
+        for (Projectile projectile : projectiles) {
             projectile.dispose();
         }
 
         defaultTextureReg.getTexture().dispose();
-
         projectiles.clear();
         projectiles = null;
-        Gdx.app.debug(getTag(), "disposed");
+        //Gdx.app.debug(getTag(), "disposed");
     }
-/*
-
-    @Override
-    public void moveRight() {
-        super.moveRight();
-        facingLeft = false;
-    }
-
-    @Override
-    public void moveLeft(){
-        super.moveLeft();
-        facingLeft = true;
-    }
-    */
 }

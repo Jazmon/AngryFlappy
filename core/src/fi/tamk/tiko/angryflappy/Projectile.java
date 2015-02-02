@@ -1,12 +1,9 @@
 package fi.tamk.tiko.angryflappy;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
 /**
@@ -14,24 +11,20 @@ import com.badlogic.gdx.utils.Disposable;
  * -
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
-public class Projectile extends GameObject implements Disposable{
+public class Projectile extends GameObject implements Disposable {
     private float rotation;
 
     public Projectile(float x, float y) {
         super();
         Texture texture = new Texture("birdshit.png");
         defaultTextureReg = new TextureRegion(texture);
-        scale.set(1,1);
+        scale.set(1, 1);
         moving = true;
         speed.set(0.0f, MathUtils.random(-320.0f, -380.0f));
         alive = true;
         rotation = 0.0f;
-        //Texture explosionSheet = new Texture("explosion.png");
-        //explosionFrames = Utilities.
         bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
     }
-
-
 
     @Override
     public void draw(SpriteBatch batch) {
@@ -92,6 +85,6 @@ public class Projectile extends GameObject implements Disposable{
     @Override
     public void dispose() {
         defaultTextureReg.getTexture().dispose();
-        Gdx.app.debug(getTag(), "disposed");
+        //Gdx.app.debug(getTag(), "disposed");
     }
 }

@@ -19,13 +19,7 @@ public abstract class GameObject implements Disposable {
     protected float speedPlus;
     protected TextureRegion defaultTextureReg;
     protected boolean alive;
-
-    public Rectangle getBounds() {
-        return bounds;
-    }
-
     protected Rectangle bounds;
-
 
     public GameObject() {
         speed = new Vector2();
@@ -66,35 +60,23 @@ public abstract class GameObject implements Disposable {
         }
     }
 
-
     protected abstract void checkCollision();
 
-    public void moveRight() {
-        speed.x = speedPlus;
-        moving = true;
+    public void die() {
+        alive = false;
     }
 
-    public void moveLeft() {
-        speed.x = -speedPlus;
-        moving = true;
-    }
+    abstract public String getTag();
 
-    public void onStopMoving() {
-        moving = false;
+    public Rectangle getBounds() {
+        return bounds;
     }
 
     public Vector2 getSpeed() {
         return speed;
     }
 
-    abstract public String getTag();
-
     public boolean isAlive() {
         return alive;
     }
-
-    public void die() {
-        alive = false;
-    }
-
 }

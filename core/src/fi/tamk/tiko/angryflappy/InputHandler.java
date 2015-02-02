@@ -16,32 +16,36 @@ import com.badlogic.gdx.utils.Array;
 // TODO: GestureHandler for flinging
 public class InputHandler implements InputProcessor {
     public static final String TAG = InputHandler.class.getName();
-    private Doge doge;
-    private boolean directionKeyPressed;
     private OrthographicCamera camera;
     private Array<TouchAction> pointers;
     private Vector3 touchpos;
+
+    private GameWorld world;
 
     public enum Move {
         Left, Right, Jump, Shoot, JumpAndShoot
     }
 
     private class TouchAction {
+        public int pointer;
+        public Move move;
+
         public TouchAction(int pointer, Move move) {
             this.pointer = pointer;
             this.move = move;
         }
-        public int pointer;
-        public Move move;
-
     }
 
-    public InputHandler(Doge doge, OrthographicCamera camera) {
-        this.doge = doge;
-        directionKeyPressed = false;
-        this.camera = camera;
+    public InputHandler(GameWorld world) {
+        this.world = world;
+        this.camera = new OrthographicCamera();
+
         touchpos = new Vector3();
         pointers = new Array<TouchAction>();
+
+        camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
+        camera.position.set(0, 0, 0);
+        camera.update();
     }
 
     @Override
@@ -49,29 +53,20 @@ public class InputHandler implements InputProcessor {
         switch (keycode) {
             case Input.Keys.A:
             case Input.Keys.LEFT:
-                /*if (!directionKeyPressed) {
-                    directionKeyPressed = true;
-                    doge.moveLeft();
-                    //Gdx.app.debug(TAG, "LEFT");
-                }*/
-                doge.setLeftMove(true);
+                world.getDoge().setLeftMove(true);
                 break;
             case Input.Keys.D:
             case Input.Keys.RIGHT:
-                /*if (!directionKeyPressed) {
-                    directionKeyPressed = true;
-                    doge.moveRight();
-                    //Gdx.app.debug(TAG, "RIGHT");
-                }*/
-                doge.setRightMove(true);
+                world.getDoge().setRightMove(true);
                 break;
             case Input.Keys.SPACE:
-                doge.shoot();
-                if(!doge.isInAir()) {
-                    doge.jump();
+                world.getDoge().shoot();
+                if (!world.getDoge().isInAir()) {
+                    world.getDoge().jump();
                 }
                 break;
         }
+
         return true;
     }
 
@@ -80,31 +75,27 @@ public class InputHandler implements InputProcessor {
         switch (keycode) {
             case Input.Keys.A:
             case Input.Keys.LEFT:
-                //directionKeyPressed = false;
-                //doge.onStopMoving();
-                // Gdx.app.debug(TAG, "stop LEFT");
-                doge.setLeftMove(false);
+                world.getDoge().setLeftMove(false);
                 break;
             case Input.Keys.D:
             case Input.Keys.RIGHT:
-                //directionKeyPressed = false;
-                //doge.onStopMoving();
-                //Gdx.app.debug(TAG, "stop RIGHT");
-                doge.setRightMove(false);
+                world.getDoge().setRightMove(false);
                 break;
             case Input.Keys.SPACE:
-                doge.stopShooting();
+                world.getDoge().stopShooting();
                 break;
             case Input.Keys.ESCAPE:
                 System.gc();
                 Gdx.app.exit();
                 break;
-            case Input.Keys.R :
-                //gameWorld.reset();
+            case Input.Keys.R:
+                world.reset();
                 break;
             case Input.Keys.O:
-                //gameWorld.showDebug();
+                world.setDrawDebug();
                 break;
+            case Input.Keys.H:
+                world.spawnMoreBirds();
         }
 
         return true;
@@ -121,20 +112,18 @@ public class InputHandler implements InputProcessor {
         touchpos = camera.unproject(touchpos);
 
         if (touchpos.x <= 0 && touchpos.y < 0) {
-            //doge.moveLeft();
-            doge.setLeftMove(true);
+            world.getDoge().setLeftMove(true);
             pointers.add(new TouchAction(pointer, Move.Left));
         } else if (touchpos.x > 0 && touchpos.y < 0) {
-            //doge.moveRight();
-            doge.setRightMove(true);
+            world.getDoge().setRightMove(true);
             pointers.add(new TouchAction(pointer, Move.Right));
         }
 
         if (touchpos.y > 0) {
-            doge.shoot();
+            world.getDoge().shoot();
             pointers.add(new TouchAction(pointer, Move.JumpAndShoot));
-            if (!doge.isInAir())
-                doge.jump();
+            if (!world.getDoge().isInAir())
+                world.getDoge().jump();
         }
 
         return true;
@@ -142,24 +131,21 @@ public class InputHandler implements InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        for(TouchAction touchAction : pointers) {
-            if(touchAction.pointer == pointer) {
+        for (TouchAction touchAction : pointers) {
+            if (touchAction.pointer == pointer) {
                 switch (touchAction.move) {
                     case Left:
-                        doge.setLeftMove(false);
+                        world.getDoge().setLeftMove(false);
                         break;
                     case Right:
-                        doge.setRightMove(false);
+                        world.getDoge().setRightMove(false);
                         break;
                     case JumpAndShoot:
-                        doge.stopShooting();
+                        world.getDoge().stopShooting();
                         break;
                 }
             }
         }
-
-        //doge.onStopMoving();
-        //doge.stopShooting();
         return true;
     }
 
@@ -176,9 +162,5 @@ public class InputHandler implements InputProcessor {
     @Override
     public boolean scrolled(int amount) {
         return false;
-    }
-
-    public Vector3 getTouchpos() {
-        return touchpos;
     }
 }

@@ -14,14 +14,15 @@ import com.badlogic.gdx.math.Vector2;
 
 // TODO: projectile speed and arch dependant on fling gesture's distance
 public class Wow extends GameObject {
-
     private boolean goBigger;
     private final Vector2 scaleMax = new Vector2(2.0f, 2.0f);
     private final Vector2 scaleMin = new Vector2(0.9f, 0.9f);
 
     @Override
     public void init() {
-
+        speed.set(0, 80f);
+        goBigger = true;
+        scale.set(1, 1);
     }
 
     @Override
@@ -32,19 +33,15 @@ public class Wow extends GameObject {
 
     public Wow(float x, float y) {
         super();
-        speed.set(0, 80f);
-        //friction.set(10.0f, 10.0f);
+
         Texture texture = new Texture("wow.png");
         defaultTextureReg = new TextureRegion(texture);
-
-        goBigger = true;
-        scale.set(1, 1);
         bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
+        init();
     }
 
     @Override
     public void draw(SpriteBatch batch) {
-        //batch.draw(defaultTextureReg,bounds.x, bounds.y, bounds.width, bounds.height);
         batch.draw(defaultTextureReg, bounds.x, bounds.y,
                 bounds.width / 2, bounds.height / 2,
                 bounds.width, bounds.height,
@@ -57,10 +54,8 @@ public class Wow extends GameObject {
     protected void checkCollision() {
         if (bounds.x + bounds.width + speed.x / 4 >= Constants.VIEWPORT_WIDTH / 2) {
             speed.set(-speed.x, speed.y);
-            // Gdx.app.debug(getTag(), "COLLIDE");
         } else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
             speed.set(-speed.x, speed.y);
-            // Gdx.app.debug(getTag(), "COLLIDE");
         }
 
         if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
@@ -79,6 +74,7 @@ public class Wow extends GameObject {
             updateMotionX(deltaTime);
             updateMotionY(deltaTime);
         }
+
         pulse();
         checkCollision();
     }
