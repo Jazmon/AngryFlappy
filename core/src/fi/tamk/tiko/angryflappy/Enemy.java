@@ -25,6 +25,7 @@ public class Enemy extends GameObject implements Disposable {
     private Animation explosion;
     private float stateTime;
     private TextureRegion currentFrame;
+    private boolean facingLeft;
 
 
     public Array<Projectile> getProjectiles() {
@@ -78,7 +79,15 @@ public class Enemy extends GameObject implements Disposable {
             }
         }
 
-        batch.draw(currentFrame, bounds.x, bounds.y, bounds.width / 2, bounds.height / 2, bounds.width, bounds.height, scale.x, scale.y, rotation);
+        boolean flip = speed.x < 0;
+        batch.draw(currentFrame,
+                flip ? bounds.x + bounds.width : bounds.x, bounds.y,
+                bounds.width / 2, bounds.height / 2,
+                flip ? -bounds.width : bounds.width, bounds.height,
+                scale.x, scale.y,
+                rotation
+        );
+
         for (Projectile projectile : projectiles)
             projectile.draw(batch);
     }
@@ -178,4 +187,18 @@ public class Enemy extends GameObject implements Disposable {
         projectiles = null;
         Gdx.app.debug(getTag(), "disposed");
     }
+/*
+
+    @Override
+    public void moveRight() {
+        super.moveRight();
+        facingLeft = false;
+    }
+
+    @Override
+    public void moveLeft(){
+        super.moveLeft();
+        facingLeft = true;
+    }
+    */
 }

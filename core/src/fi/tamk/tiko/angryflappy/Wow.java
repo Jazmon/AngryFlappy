@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 // TODO: projectile speed and arch dependant on fling gesture's distance
-public class Wow extends GameObject{
+public class Wow extends GameObject {
 
     private boolean goBigger;
     private final Vector2 scaleMax = new Vector2(2.0f, 2.0f);
@@ -38,14 +38,14 @@ public class Wow extends GameObject{
         defaultTextureReg = new TextureRegion(texture);
 
         goBigger = true;
-        scale.set(1,1);
-        bounds.set(x,y,defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
+        scale.set(1, 1);
+        bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
     }
 
     @Override
     public void draw(SpriteBatch batch) {
         //batch.draw(defaultTextureReg,bounds.x, bounds.y, bounds.width, bounds.height);
-        batch.draw(defaultTextureReg,bounds.x,bounds.y,
+        batch.draw(defaultTextureReg, bounds.x, bounds.y,
                 bounds.width / 2, bounds.height / 2,
                 bounds.width, bounds.height,
                 scale.x, scale.y,
@@ -85,15 +85,15 @@ public class Wow extends GameObject{
 
     private void pulse() {
         float change = 0.05f;
-        if(goBigger) {
+        if (goBigger) {
             scale.add(change, change);
         } else {
             scale.add(-change, -change);
         }
 
-        if(scale.x >= scaleMax.x) {
+        if (scale.x >= scaleMax.x) {
             goBigger = false;
-        } else if(scale.x <= scaleMin.x) {
+        } else if (scale.x <= scaleMin.x) {
             goBigger = true;
         }
     }

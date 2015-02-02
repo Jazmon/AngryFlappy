@@ -1,6 +1,5 @@
 package fi.tamk.tiko.angryflappy;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
@@ -30,7 +29,7 @@ public abstract class GameObject implements Disposable {
 
     public GameObject() {
         speed = new Vector2();
-        scale = new Vector2(1,1);
+        scale = new Vector2(1, 1);
         friction = new Vector2();
         moving = false;
         speedPlus = 100.0f;
@@ -40,7 +39,9 @@ public abstract class GameObject implements Disposable {
     }
 
     public abstract void draw(SpriteBatch batch);
+
     public abstract void update(float deltaTime);
+
     public abstract void init();
 
     protected void updateMotionX(float deltaTime) {
@@ -53,7 +54,8 @@ public abstract class GameObject implements Disposable {
             }
         }
     }
-    protected void updateMotionY(float deltaTime){
+
+    protected void updateMotionY(float deltaTime) {
         if (speed.y != 0) {
             // Apply friction
             if (speed.y > 0) {

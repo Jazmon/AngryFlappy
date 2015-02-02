@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Iterator;
+
 /**
  * Created by Atte Huhtakangas on 27.1.2015 23:10.
  * -
@@ -24,15 +26,12 @@ public class Doge extends GameObject {
     private Ground ground;
     private boolean isPlacedLeft;
 
+    private boolean leftMove;
+    private boolean rightMove;
+
     private Array<Wow> wows;
-
-    public boolean isInAir() {
-        return isInAir;
-    }
-
     private boolean isInAir;
     private float gravity;
-
     public Doge(Ground ground) {
         super();
         allFrames = new Array<TextureRegion>();
@@ -42,6 +41,10 @@ public class Doge extends GameObject {
         bounds.set(-Constants.VIEWPORT_WIDTH / 2 + 100, -Constants.VIEWPORT_HEIGHT / 2 + 100, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
         init();
         this.ground = ground;
+    }
+
+    public boolean isInAir() {
+        return isInAir;
     }
 
     @Override
@@ -61,6 +64,9 @@ public class Doge extends GameObject {
         //bounds.set(200f, ground.getRect().y + ground.getRect().height);
         bounds.setX(200f);
         bounds.setY(-Constants.VIEWPORT_HEIGHT / 2 + 30);
+        leftMove = false;
+        rightMove = false;
+        speedPlus = 150f;
     }
 
     @Override
@@ -95,18 +101,23 @@ public class Doge extends GameObject {
 
     @Override
     public void update(float deltaTime) {
+
+        updateMotion();
+
         // move to new position
         bounds.x += speed.x * deltaTime;
         bounds.y += speed.y * deltaTime;
+
 
         if (isFacingLeft() && !isPlacedLeft) {
             bounds.x -= bounds.width;
             Gdx.app.debug(getTag(), "Moving rect to left");
             isPlacedLeft = true;
-        } else if(!isFacingLeft() && isPlacedLeft){
+        } else if (!isFacingLeft() && isPlacedLeft) {
             isPlacedLeft = false;
             bounds.x += bounds.width;
         }
+
         // TODO: Handling jumping better!
         if (isInAir) {
             if (bounds.y > ground.getRect().y + ground.getRect().height) {
@@ -120,11 +131,10 @@ public class Doge extends GameObject {
                 speed.y = 0;
             }
         }
-        //if(bounds.y + speedX > 0)
 
+        // Reduce speed if not moving
         if (!moving) {
             updateMotionX(deltaTime);
-            //updateMotionY(deltaTime);
         }
 
         updateWows(deltaTime);
@@ -132,45 +142,35 @@ public class Doge extends GameObject {
         removeDeadWows();
     }
 
+    private void updateMotion() {
+        speed.x = 0;
+        if(leftMove) {
+            speed.x -= speedPlus;
+        }
+        if(rightMove) {
+            speed.x += speedPlus;
+        }
+    }
+
     @Override
     protected void checkCollision() {
         // if hit right wall
         if (bounds.x + bounds.width + speed.x / 4 >= Constants.VIEWPORT_WIDTH / 2) {
-            speed.set(0, speed.y);
-            // Gdx.app.debug(getTag(), "COLLIDE");
+            speed.set(-speed.x / 10, speed.y);
         }
         // if hit left wall
         else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
-            speed.set(0, speed.y);
-            // Gdx.app.debug(getTag(), "COLLIDE");
-        }
-
-        // if hit ceiling
-        /*if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
-            speed.set(speed.x, -speed.y);
-        } else if (bounds.y + speed.y / 4 <= -Constants.VIEWPORT_HEIGHT / 2) {
-            speed.set(speed.x, 0);
-        }*/
-        // if hit floor
-        //if (bounds.y <= (ground.getRect().y + ground.getRect().height)) {
-        //   speed.set(speed.x, 0);
-        //}
-    }
-
-    private void updateWows(float deltaTime) {
-        for (Wow wow : wows) {
-            if (wow != null)
-                wow.update(deltaTime);
+            speed.set(-speed.x / 10, speed.y);
         }
     }
 
-    private void drawWows(SpriteBatch batch) {
-        for (Wow wow : wows) {
-            if (wow != null)
-                wow.draw(batch);
-        }
-    }
 
+
+    /**
+     * Draws the doge and the wow projectiles.
+     *
+     * @param batch
+     */
     @Override
     public void draw(SpriteBatch batch) {
         boolean flip = false;
@@ -200,6 +200,10 @@ public class Doge extends GameObject {
         drawWows(batch);
     }
 
+    /**
+     * Shoot a new wow projectile.
+     */
+    // TODO: add fling and the velocity variable from it
     public void shoot() {
         isShooting = true;
         float posX = facingLeft ? bounds.x - bounds.width / 2 : bounds.x + bounds.width / 2;
@@ -207,18 +211,6 @@ public class Doge extends GameObject {
 
         Wow wow = new Wow(posX, posY);
         wows.add(wow);
-    }
-
-    public void stopShooting() {
-        isShooting = false;
-    }
-
-    public boolean isMoving() {
-        return speed.x != 0;
-    }
-
-    public boolean isFacingLeft() {
-        return facingLeft;
     }
 
     @Override
@@ -233,22 +225,56 @@ public class Doge extends GameObject {
         facingLeft = false;
     }
 
-    private void removeDeadWows() {
-        for (int i = 0; i < wows.size; i++) {
-            if (!wows.get(i).isAlive()) {
-                wows.get(i).dispose();
-                wows.removeIndex(i);
-            }
+    /**
+     * Sets the doge to take damage and die when 0 lives left.
+     *
+     * Overrides the GameObject normal behavior by adding lives.
+     */
+    @Override
+    public void die() {
+        if (lives > 0) {
+            lives--;
+            Gdx.input.vibrate(300);
+        } else {
+            Gdx.input.vibrate(600);
+            super.die();
         }
     }
 
-    @Override
-    public void die() {
-        if(lives > 0) {
-            lives--;
-        } else {
-            super.die();
-        }
+    /**
+     * Jumps the doge.
+     *
+     * Increases the speed.y and marks that the doge is in air.
+     */
+    public void jump() {
+        speed.y += 150.0f;
+        isInAir = true;
+    }
+
+    /**
+     * Sets the doge to move left.
+     *
+     * If moving right, override it by setting rightMove to false.
+     *
+     * @param t whether to move left or not.
+     */
+    public void setLeftMove(boolean t) {
+        if(rightMove && t) rightMove = false;
+        leftMove = t;
+        facingLeft = t;
+    }
+
+    /**
+     * Sets the doge to move right.
+     *
+     * If moving left, override it by setting leftMove to false.
+     *
+     * @param t whether to move right or not.
+     */
+    public void setRightMove(boolean t) {
+        if(leftMove && t) leftMove = false;
+        rightMove = t;
+        facingLeft = t;
     }
 
     public int getLives() {
@@ -260,12 +286,54 @@ public class Doge extends GameObject {
         return Doge.class.getName();
     }
 
-    public void jump() {
-        speed.y += 150.0f;
-        isInAir = true;
-    }
+
 
     public Array<Wow> getWows() {
         return wows;
+    }
+
+    public void stopShooting() {
+        isShooting = false;
+    }
+
+    public boolean isMoving() {
+        return speed.x != 0;
+    }
+
+    public boolean isFacingLeft() {
+        return facingLeft;
+    }
+
+    /**
+     * Removes dead wows.
+     */
+    private void removeDeadWows() {
+        Iterator<Wow> it = wows.iterator();
+        while(it.hasNext()) {
+            Wow wow = it.next();
+            if(!wow.isAlive()) {
+                wow.dispose();
+                it.remove();
+            }
+        }
+    }
+
+    private void updateWows(float deltaTime) {
+        for (Wow wow : wows) {
+            if (wow != null)
+                wow.update(deltaTime);
+        }
+    }
+
+    /**
+     * Draws the wow projectiles.
+     *
+     * @param batch
+     */
+    private void drawWows(SpriteBatch batch) {
+        for (Wow wow : wows) {
+            if (wow != null)
+                wow.draw(batch);
+        }
     }
 }
