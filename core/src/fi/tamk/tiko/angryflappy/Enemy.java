@@ -2,6 +2,7 @@ package fi.tamk.tiko.angryflappy;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -18,6 +19,13 @@ public class Enemy extends GameObject implements Disposable {
 
     private float rotation;
     private long prevShotTime;
+
+    private boolean exploded;
+    private Array<TextureRegion> explosionFrames;
+    private Animation explosion;
+    private float stateTime;
+    private TextureRegion currentFrame;
+
 
     public Array<Projectile> getProjectiles() {
         return projectiles;
@@ -38,11 +46,39 @@ public class Enemy extends GameObject implements Disposable {
         bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
         prevShotTime = 0;
         projectiles = new Array<Projectile>();
+
+        stateTime = 0f;
+        explosionFrames = new Array<TextureRegion>();
+        currentFrame = defaultTextureReg;
+        exploded = false;
+        explosion = setAnimation("explosion.png", 5, 5,1 / 25.0f, 0, 24);
+        explosion.setPlayMode(Animation.PlayMode.LOOP);
+    }
+
+    @Override
+    public void die() {
+        if(!exploded) {
+            exploded = true;
+            Gdx.app.debug(getTag(), "setting exploded to true");
+        } else {
+            Gdx.app.debug(getTag(), "finally calling super.die()");
+            super.die();
+        }
     }
 
     @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(defaultTextureReg, bounds.x, bounds.y, bounds.width / 2, bounds.height / 2, bounds.width, bounds.height, scale.x, scale.y, rotation);
+        if(exploded) {
+            stateTime += Gdx.graphics.getDeltaTime();
+            Gdx.app.debug(getTag(), "Is exploded,setting to expl. frames");
+            currentFrame = explosion.getKeyFrame(stateTime, false);
+            if(explosion.isAnimationFinished(stateTime)) {
+                Gdx.app.debug(getTag(), "animation finished, removing");
+                die();
+            }
+        }
+
+        batch.draw(currentFrame, bounds.x, bounds.y, bounds.width / 2, bounds.height / 2, bounds.width, bounds.height, scale.x, scale.y, rotation);
         for (Projectile projectile : projectiles)
             projectile.draw(batch);
     }
@@ -65,6 +101,21 @@ public class Enemy extends GameObject implements Disposable {
         shoot();
 
         removeDeadProjectiles();
+    }
+
+    private Animation setAnimation(String textureFileName, int frameCols, int frameRows, float animDelay, int framesStart, int framesEnd) {
+        Texture textureSheet = new Texture(textureFileName);
+        textureSheet.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+
+        int tileWidth = textureSheet.getWidth() / frameCols;
+        int tileHeight = textureSheet.getHeight() / frameRows;
+        TextureRegion[][] tmp = TextureRegion.split(textureSheet, tileWidth, tileHeight);
+
+        Array<TextureRegion> frames = Utilities.to1DArray(tmp);
+
+        explosionFrames.addAll(frames);
+        Gdx.app.debug(getTag(), "bird explosion frames count:" + explosionFrames.size);
+        return new Animation(animDelay, Utilities.getFramesRange(frames, framesStart, framesEnd));
     }
 
     private void removeDeadProjectiles() {

@@ -58,6 +58,9 @@ public class Doge extends GameObject {
         alive = true;
         isInAir = false;
         gravity = 4f;
+        //bounds.set(200f, ground.getRect().y + ground.getRect().height);
+        bounds.setX(200f);
+        bounds.setY(-Constants.VIEWPORT_HEIGHT / 2 + 30);
     }
 
     @Override
