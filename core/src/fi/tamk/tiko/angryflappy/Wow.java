@@ -1,6 +1,5 @@
 package fi.tamk.tiko.angryflappy;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -38,7 +37,6 @@ public class Wow extends GameObject implements Pool.Poolable {
     @Override
     public void dispose() {
         defaultTextureReg.getTexture().dispose();
-        Gdx.app.debug(getTag(), "disposed");
     }
 
     @Override
@@ -93,6 +91,10 @@ public class Wow extends GameObject implements Pool.Poolable {
         } else if (scale.x <= scaleMin.x) {
             goBigger = true;
         }
+    }
+
+    public void setSpeedMultiplier(float velocity) {
+        speed.x += speed.x * (velocity / 1000);
     }
 
     @Override

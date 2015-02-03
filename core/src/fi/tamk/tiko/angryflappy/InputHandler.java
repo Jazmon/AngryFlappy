@@ -22,9 +22,12 @@ public class InputHandler implements InputProcessor {
     private Array<TouchAction> pointers;
     private Vector3 touchpos;
     private GameWorld world;
+    private GameRenderer renderer;
 
-    public InputHandler(GameWorld world) {
+
+    public InputHandler(GameWorld world, GameRenderer renderer) {
         this.world = world;
+        this.renderer = renderer;
         this.camera = new OrthographicCamera();
 
         touchpos = new Vector3();
@@ -47,10 +50,8 @@ public class InputHandler implements InputProcessor {
                 world.getDoge().setRightMove(true);
                 break;
             case Input.Keys.SPACE:
-
                 if (!world.getDoge().isInAir()) {
                     world.getDoge().jump();
-                    //world.getDoge().shoot();
                     world.addWow(world.getDoge().shoot());
                 }
                 break;
@@ -73,18 +74,22 @@ public class InputHandler implements InputProcessor {
             case Input.Keys.SPACE:
                 world.getDoge().stopShooting();
                 break;
+            // Exit the game
             case Input.Keys.ESCAPE:
                 System.gc();
                 Gdx.app.exit();
                 break;
+            // Reset the world
             case Input.Keys.R:
                 world.reset();
                 break;
+            // Toggle drawing debug
             case Input.Keys.O:
                 world.setDrawDebug();
                 break;
+            // Spawn more birds
             case Input.Keys.H:
-                world.spawnMoreBirds();
+                world.spawnMoreBirdsDebug();
         }
 
         return true;
@@ -111,10 +116,16 @@ public class InputHandler implements InputProcessor {
         }
 
         if (touchpos.y > 0) {
-            world.getDoge().shoot();
             pointers.add(new TouchAction(pointer, Move.JumpAndShoot));
-            if (!world.getDoge().isInAir())
-                world.getDoge().jump();
+            if (!world.getDoge().isInAir()) {
+                //world.getDoge().jump();
+                world.addWow(world.getDoge().shoot());
+            }
+        }
+
+        if (!world.getDoge().isAlive()) {
+            world.reset();
+            renderer.init();
         }
 
         return true;

@@ -27,22 +27,22 @@ public class GameRenderer implements Disposable {
     private ShapeRenderer shapeRenderer;
 
     private GameWorld world;
+    private float velocityDebug;
 
     public GameRenderer(GameWorld world) {
         this.world = world;
-        init();
-    }
-
-    private void init() {
-        font = new BitmapFont();
-        font.setScale(1.50f, 1.50f);
-        font.setColor(Color.WHITE);
         background = new Texture("background.jpg");
-
+        font = new BitmapFont();
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
-
         camera = new OrthographicCamera();
+        init();
+        velocityDebug = 0;
+    }
+
+    public void init() {
+        font.setScale(1.50f, 1.50f);
+        font.setColor(Color.WHITE);
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH,
                 Constants.VIEWPORT_HEIGHT);
         camera.position.set(0, 0, 0);
@@ -87,6 +87,7 @@ public class GameRenderer implements Disposable {
         }
         font.draw(batch, "Lives: " + world.getDoge().getLives(),
                 -Constants.VIEWPORT_WIDTH / 2 + 30, Constants.VIEWPORT_HEIGHT / 2 - 30);
+        font.draw(batch, "Velocity.y: " + velocityDebug, Constants.VIEWPORT_WIDTH / 2 - 200, -Constants.VIEWPORT_HEIGHT / 2 + 30);
         batch.end();
 
         if (world.isDrawDebug()) {

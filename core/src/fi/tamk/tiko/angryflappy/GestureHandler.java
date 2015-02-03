@@ -10,9 +10,11 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class GestureHandler implements GestureListener {
     private GameWorld world;
+    private GameRenderer renderer;
 
-    public GestureHandler(GameWorld world) {
+    public GestureHandler(GameWorld world, GameRenderer renderer) {
         this.world = world;
+        this.renderer = renderer;
     }
 
     @Override
@@ -32,7 +34,15 @@ public class GestureHandler implements GestureListener {
 
     @Override
     public boolean fling(float velocityX, float velocityY, int button) {
-        return false;
+        if (velocityY > 0) {
+            return false;
+        }
+        if (!world.getDoge().isInAir()) {
+            world.getDoge().jump(-velocityY);
+            //world.addWow(world.getDoge().shoot(-velocityY));
+        }
+
+        return true;
     }
 
     @Override
@@ -47,7 +57,6 @@ public class GestureHandler implements GestureListener {
 
     @Override
     public boolean zoom(float initialDistance, float distance) {
-        world.getDoge().jump();
         return false;
     }
 
@@ -55,4 +64,6 @@ public class GestureHandler implements GestureListener {
     public boolean pinch(Vector2 initialPointer1, Vector2 initialPointer2, Vector2 pointer1, Vector2 pointer2) {
         return false;
     }
+
+
 }

@@ -1,11 +1,10 @@
 package fi.tamk.tiko.angryflappy;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.Iterator;
@@ -25,11 +24,15 @@ public class GameWorld {
 
     // Assets
     private Music music;
+    private Sound selectSound;
+    private Sound gameOverSound;
+    private Sound explosionSound;
     private Ground ground;
     private boolean drawDebug;
 
     // Game Logic
     private int enemiesCount;
+    private int enemiesLastRound;
     private int score;
 
 
@@ -37,16 +40,11 @@ public class GameWorld {
         drawDebug = false;
         ground = new Ground();
 
-        // Create input handlers
-        InputHandler inputHandler = new InputHandler(this);
-        GestureDetector.GestureListener gestureListener = new GestureHandler(this);
-        InputMultiplexer inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(new GestureDetector(gestureListener));
-        inputMultiplexer.addProcessor(inputHandler);
-        Gdx.input.setInputProcessor(inputMultiplexer);
-
         // Load the music track
         music = Gdx.audio.newMusic(Gdx.files.internal("music/DogeMusic.mp3"));
+        selectSound = Gdx.audio.newSound(Gdx.files.internal("sounds/select.wav"));
+        gameOverSound = Gdx.audio.newSound(Gdx.files.internal("sounds/game_over.wav"));
+        explosionSound = Gdx.audio.newSound(Gdx.files.internal("sounds/explosion.wav"));
 
         init();
     }
@@ -63,6 +61,7 @@ public class GameWorld {
         wows = new Array<>();
 
         enemiesCount = 5;
+        enemiesLastRound = enemiesCount;
         score = 0;
 
         if (doge != null)
@@ -73,6 +72,7 @@ public class GameWorld {
 
         music.setLooping(true);
         music.play();
+        selectSound.play(0.5f);
     }
 
     public void reset() {
@@ -100,6 +100,10 @@ public class GameWorld {
 
             // Remove dead objects
             removeDeadObjects();
+
+            // Check enemies count and increase if 0
+            if (enemiesCount <= 0)
+                spawnMoreBirds(enemiesLastRound + 2);
         }
 
     }
@@ -109,6 +113,7 @@ public class GameWorld {
         while (eIt.hasNext()) {
             Enemy enemy = eIt.next();
             if (!enemy.isAlive()) {
+                enemiesCount--;
                 enemy.dispose();
                 eIt.remove();
             }
@@ -148,6 +153,7 @@ public class GameWorld {
                 if (wow.getBounds().overlaps(enemy.getBounds())) {
                     wow.die();
                     enemy.die();
+                    explosionSound.play(0.5f);
                     score += 100;
                 }
             }
@@ -235,8 +241,16 @@ public class GameWorld {
         wows.add(wow);
     }
 
-    public void spawnMoreBirds() {
-        for (int i = 0; i < 5; i++) {
+    public void spawnMoreBirds(int enemyCount) {
+        for (int i = 0; i < enemyCount; i++) {
+            enemies.add(new Enemy());
+            enemiesCount++;
+        }
+        enemiesLastRound = enemiesCount;
+    }
+
+    public void spawnMoreBirdsDebug() {
+        for (int i = 0; i < 6; i++) {
             enemies.add(new Enemy());
         }
     }

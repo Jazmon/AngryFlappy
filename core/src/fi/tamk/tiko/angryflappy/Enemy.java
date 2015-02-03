@@ -38,7 +38,7 @@ public class Enemy extends GameObject implements Disposable {
     @Override
     public void init() {
         float x = MathUtils.random(-Constants.VIEWPORT_WIDTH / 2 + 20, -Constants.VIEWPORT_WIDTH / 2 + 300);
-        float y = MathUtils.random(Constants.VIEWPORT_HEIGHT / 2 - 30, Constants.VIEWPORT_HEIGHT / 2 - 100);
+        float y = MathUtils.random(Constants.VIEWPORT_HEIGHT / 2 - 50, Constants.VIEWPORT_HEIGHT / 2 - 120);
         bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
         exploded = false;
         stateTime = 0f;
@@ -71,12 +71,6 @@ public class Enemy extends GameObject implements Disposable {
 
         boolean flip = speed.x < 0;
 
-        if (flip && !flipped) {
-            bounds.x -= bounds.width / 2;
-        } else if (!flip && flipped) {
-            bounds.x += bounds.width / 2;
-        }
-
         batch.draw(currentFrame,
                 flip ? bounds.x + bounds.width : bounds.x, bounds.y,
                 bounds.width / 2, bounds.height / 2,
@@ -91,6 +85,16 @@ public class Enemy extends GameObject implements Disposable {
     public void update(float deltaTime) {
         bounds.x += speed.x * deltaTime;
         bounds.y += speed.y * deltaTime;
+
+        boolean flip = speed.x < 0;
+
+        if (flip && !flipped) {
+            bounds.x -= bounds.width / 2;
+            flipped = true;
+        } else if (!flip && flipped) {
+            bounds.x += bounds.width / 2;
+            flipped = false;
+        }
 
         if (!moving) {
             updateMotionX(deltaTime);
@@ -114,15 +118,19 @@ public class Enemy extends GameObject implements Disposable {
     @Override
     protected void checkCollision() {
         if (bounds.x + bounds.width + speed.x / 4 >= Constants.VIEWPORT_WIDTH / 2) {
+            bounds.x = Constants.VIEWPORT_WIDTH / 2 - bounds.width;
             speed.set(-speed.x, speed.y);
         } else if (bounds.x + speed.x / 4 <= -Constants.VIEWPORT_WIDTH / 2) {
+            bounds.x = -Constants.VIEWPORT_WIDTH / 2 + bounds.width;
             speed.set(-speed.x, speed.y);
         }
 
         if (bounds.y + bounds.height + speed.x / 4 >= Constants.VIEWPORT_HEIGHT / 2) {
+            bounds.y = Constants.VIEWPORT_HEIGHT / 2 - bounds.height;
             speed.set(speed.x, -speed.y);
         } else if (bounds.y + speed.y / 4 <= -Constants.VIEWPORT_HEIGHT / 2) {
-            speed.set(speed.x, -speed.y);
+            //speed.set(speed.x, -speed.y);
+            die();
         }
     }
 

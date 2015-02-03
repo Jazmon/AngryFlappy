@@ -1,6 +1,7 @@
 package fi.tamk.tiko.angryflappy;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -27,6 +28,9 @@ public class Doge extends GameObject {
 
     private boolean isInAir;
     private float gravity;
+    private Sound jumpSound;
+    private Sound wowSound;
+    private Sound hitSound;
 
     public Doge(Ground ground) {
         super();
@@ -37,6 +41,9 @@ public class Doge extends GameObject {
         init();
         this.ground = ground;
         flip = false;
+        jumpSound = Gdx.audio.newSound(Gdx.files.internal("sounds/jump.wav"));
+        wowSound = Gdx.audio.newSound(Gdx.files.internal("sounds/wow.wav"));
+        hitSound = Gdx.audio.newSound(Gdx.files.internal("sounds/hit.wav"));
     }
 
     public boolean isInAir() {
@@ -176,7 +183,7 @@ public class Doge extends GameObject {
         isShooting = true;
         float posX = facingLeft ? bounds.x - bounds.width / 2 : bounds.x + bounds.width / 2;
         float posY = bounds.y + bounds.height;
-
+        wowSound.play(0.5f);
         return new Wow(posX, posY);
     }
 
@@ -187,6 +194,7 @@ public class Doge extends GameObject {
      */
     @Override
     public void die() {
+        hitSound.play(0.5f);
         if (lives > 0) {
             lives--;
             Gdx.input.vibrate(200);
@@ -204,6 +212,13 @@ public class Doge extends GameObject {
     public void jump() {
         speed.y += 150.0f;
         isInAir = true;
+        jumpSound.play(0.5f);
+    }
+
+    public void jump(float velocity) {
+        speed.y += 150.0f * (velocity / 5000f);
+        isInAir = true;
+        jumpSound.play(0.5f);
     }
 
     /**

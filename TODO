@@ -1,0 +1,5 @@
+TODO:
+- "Flip" bird rectangle when texture is flipped
+- Handle jumping better
+- make birds touching ground decrease score
+- make so that doge can't spam shoot

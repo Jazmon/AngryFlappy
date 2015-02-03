@@ -3,6 +3,8 @@ package fi.tamk.tiko.angryflappy;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.input.GestureDetector;
 
 
 public class AngryFlappy extends Game {
@@ -18,6 +20,14 @@ public class AngryFlappy extends Game {
 
         world = new GameWorld();
         renderer = new GameRenderer(world);
+
+        // Create input handlers
+        InputHandler inputHandler = new InputHandler(world, renderer);
+        GestureDetector.GestureListener gestureListener = new GestureHandler(world, renderer);
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        inputMultiplexer.addProcessor(new GestureDetector(gestureListener));
+        inputMultiplexer.addProcessor(inputHandler);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     @Override
