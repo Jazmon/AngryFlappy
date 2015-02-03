@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Pool;
 
 /**
  * Created by Atte Huhtakangas on 29.1.2015 21:09.
@@ -13,31 +14,31 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 // TODO: projectile speed and arch dependant on fling gesture's distance
-public class Wow extends GameObject {
-    private boolean goBigger;
+public class Wow extends GameObject implements Pool.Poolable {
     private final Vector2 scaleMax = new Vector2(2.0f, 2.0f);
     private final Vector2 scaleMin = new Vector2(0.9f, 0.9f);
+    private boolean goBigger;
+
+    public Wow(float x, float y) {
+        super();
+        defaultTextureReg = new TextureRegion(new Texture("wow.png"));
+        bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
+
+        init();
+    }
 
     @Override
     public void init() {
         speed.set(0, 80f);
         goBigger = true;
         scale.set(1, 1);
+        alive = true;
     }
 
     @Override
     public void dispose() {
         defaultTextureReg.getTexture().dispose();
         Gdx.app.debug(getTag(), "disposed");
-    }
-
-    public Wow(float x, float y) {
-        super();
-
-        Texture texture = new Texture("wow.png");
-        defaultTextureReg = new TextureRegion(texture);
-        bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
-        init();
     }
 
     @Override
@@ -97,5 +98,10 @@ public class Wow extends GameObject {
     @Override
     public String getTag() {
         return Wow.class.getName();
+    }
+
+    @Override
+    public void reset() {
+        init();
     }
 }

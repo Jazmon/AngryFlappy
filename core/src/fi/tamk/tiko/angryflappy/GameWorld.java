@@ -8,43 +8,69 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.input.GestureDetector;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Iterator;
+
 /**
  * Created by Atte Huhtakangas on 2.2.2015 16:31.
  * -
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
 public class GameWorld {
+
+    // Game Objects
     private Doge doge;
-    private InputHandler inputHandler;
-    private Music music;
+    private Array<Projectile> projectiles;
     private Array<Enemy> enemies;
+    private Array<Wow> wows;
+
+    // Assets
+    private Music music;
     private Ground ground;
-    private GestureDetector.GestureListener gestureListener;
-    private InputMultiplexer inputMultiplexer;
-    private int enemiesCount;
     private boolean drawDebug;
 
+    // Game Logic
+    private int enemiesCount;
+    private int score;
+
+
     public GameWorld() {
+        drawDebug = false;
         ground = new Ground();
-        inputHandler = new InputHandler(this);
-        gestureListener = new GestureHandler(this);
-        inputMultiplexer = new InputMultiplexer();
+
+        // Create input handlers
+        InputHandler inputHandler = new InputHandler(this);
+        GestureDetector.GestureListener gestureListener = new GestureHandler(this);
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
         inputMultiplexer.addProcessor(new GestureDetector(gestureListener));
         inputMultiplexer.addProcessor(inputHandler);
         Gdx.input.setInputProcessor(inputMultiplexer);
-        drawDebug = false;
 
+        // Load the music track
         music = Gdx.audio.newMusic(Gdx.files.internal("music/DogeMusic.mp3"));
 
         init();
     }
 
     private void init() {
-        Gdx.input.setInputProcessor(inputMultiplexer);
+
+        if (projectiles != null)
+            projectiles.clear();
+
+        projectiles = new Array<>();
+
+        if (wows != null)
+            wows.clear();
+        wows = new Array<>();
 
         enemiesCount = 5;
+        score = 0;
+
+        if (doge != null)
+            doge.dispose();
         doge = new Doge(ground);
+
         spawnBirds();
+
         music.setLooping(true);
         music.play();
     }
@@ -54,64 +80,113 @@ public class GameWorld {
     }
 
     public void update(float deltaTime) {
+        // Update positions etc. for game objects
+        if (doge.isAlive()) {
+            doge.update(deltaTime);
+            for (Enemy enemy : enemies)
+                enemy.update(deltaTime);
+            for (Enemy enemy : enemies) {
+                Projectile projectile = enemy.shoot();
+                if (projectile != null)
+                    projectiles.add(projectile);
+            }
+            for (Wow wow : wows)
+                wow.update(deltaTime);
+            for (Projectile projectile : projectiles)
+                projectile.update(deltaTime);
 
-        // remove dead
-        for (int i = 0; i < enemies.size; i++) {
-            if (!enemies.get(i).isAlive()) {
-                enemies.get(i).dispose();
-                enemies.removeIndex(i);
+            // Check the collision
+            checkCollision();
+
+            // Remove dead objects
+            removeDeadObjects();
+        }
+
+    }
+
+    private void removeDeadObjects() {
+        Iterator<Enemy> eIt = enemies.iterator();
+        while (eIt.hasNext()) {
+            Enemy enemy = eIt.next();
+            if (!enemy.isAlive()) {
+                enemy.dispose();
+                eIt.remove();
             }
         }
 
-        checkCollision();
-        doge.update(deltaTime);
+        Iterator<Projectile> pIt = projectiles.iterator();
+        while (pIt.hasNext()) {
+            Projectile projectile = pIt.next();
+            if (!projectile.isAlive()) {
+                projectile.dispose();
+                pIt.remove();
+            }
+        }
 
-        for (Enemy enemy : enemies)
-            enemy.update(deltaTime);
+        Iterator<Wow> wIt = wows.iterator();
+        while (wIt.hasNext()) {
+            Wow wow = wIt.next();
+            if (!wow.isAlive()) {
+                wow.dispose();
+                wIt.remove();
+            }
+        }
     }
 
     private void checkCollision() {
         // check if enemy hits doge
         for (Enemy enemy : enemies) {
             if (enemy.getBounds().overlaps(doge.getBounds())) {
+                enemy.die();
                 doge.die();
             }
         }
 
         // check if wow hits bird
-        Array<Wow> wows = doge.getWows();
         for (Wow wow : wows) {
             for (Enemy enemy : enemies) {
                 if (wow.getBounds().overlaps(enemy.getBounds())) {
                     wow.die();
                     enemy.die();
+                    score += 100;
                 }
             }
         }
 
         // check if projectile hits doge
-        for (Enemy enemy : enemies) {
-            for (Projectile projectile : enemy.getProjectiles()) {
-                if (projectile.getBounds().overlaps(doge.getBounds())) {
-                    doge.die();
-                    projectile.die();
-                }
+        for (Projectile projectile : projectiles) {
+            if (projectile.getBounds().overlaps(doge.getBounds())) {
+                projectile.die();
+                doge.die();
             }
         }
     }
 
     public void render(SpriteBatch batch) {
+        // Draw the doge
         doge.draw(batch);
+        // Draw the enemies
         for (Enemy enemy : enemies)
             enemy.draw(batch);
-
+        // Draw the wow projectiles
+        for (Wow wow : wows)
+            wow.draw(batch);
+        // Draw the bird shit projectiles
+        for (Projectile projectile : projectiles)
+            projectile.draw(batch);
     }
 
     public void renderDebug(ShapeRenderer shapeRenderer) {
-        shapeRenderer.rect(ground.getRect().x, ground.getRect().y,
-                ground.getRect().width, ground.getRect().height);
-        shapeRenderer.rect(doge.getBounds().x, doge.getBounds().y,
-                doge.getBounds().width, doge.getBounds().height);
+        ground.renderDebug(shapeRenderer);
+        doge.drawDebug(shapeRenderer);
+
+        for (Enemy enemy : enemies)
+            enemy.drawDebug(shapeRenderer);
+        for (Wow wow : wows)
+            wow.drawDebug(shapeRenderer);
+        for (Projectile projectile : projectiles)
+            projectile.drawDebug(shapeRenderer);
+
     }
 
     public void dispose() {
@@ -119,8 +194,18 @@ public class GameWorld {
         for (Enemy enemy : enemies) {
             enemy.dispose();
         }
+        for (Projectile projectile : projectiles) {
+            projectile.dispose();
+        }
+        for (Wow wow : wows) {
+            wow.dispose();
+        }
         enemies.clear();
         enemies = null;
+        projectiles.clear();
+        projectiles = null;
+        wows.clear();
+        wows = null;
         music.dispose();
     }
 
@@ -129,7 +214,7 @@ public class GameWorld {
     }
 
     public void setDrawDebug() {
-        this.drawDebug = drawDebug ? false : true;
+        this.drawDebug = !drawDebug;
     }
 
     public boolean isDrawDebug() {
@@ -137,16 +222,27 @@ public class GameWorld {
     }
 
     public void spawnBirds() {
-        enemies = new Array<Enemy>();
+        if (enemies != null)
+            enemies.clear();
+
+        enemies = new Array<>();
         for (int i = 0; i < enemiesCount; i++) {
             enemies.add(new Enemy());
         }
+    }
+
+    public void addWow(Wow wow) {
+        wows.add(wow);
     }
 
     public void spawnMoreBirds() {
         for (int i = 0; i < 5; i++) {
             enemies.add(new Enemy());
         }
+    }
+
+    public int getScore() {
+        return score;
     }
 }
 

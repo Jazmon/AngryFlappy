@@ -5,25 +5,39 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Disposable;
+import com.badlogic.gdx.utils.Pool;
 
 /**
  * Created by Atte Huhtakangas on 31.1.2015 14:52.
  * -
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
-public class Projectile extends GameObject implements Disposable {
+public class Projectile extends GameObject implements Disposable, Pool.Poolable {
     private float rotation;
 
     public Projectile(float x, float y) {
         super();
         Texture texture = new Texture("birdshit.png");
         defaultTextureReg = new TextureRegion(texture);
+
+        init(x, y);
+    }
+
+    public void init(float x, float y) {
         scale.set(1, 1);
         moving = true;
         speed.set(0.0f, MathUtils.random(-320.0f, -380.0f));
         alive = true;
         rotation = 0.0f;
         bounds.set(x, y, defaultTextureReg.getRegionWidth(), defaultTextureReg.getRegionHeight());
+    }
+
+    /**
+     * Do not use.
+     */
+    @Override
+    public void init() {
+        init(0, 0);
     }
 
     @Override
@@ -72,10 +86,7 @@ public class Projectile extends GameObject implements Disposable {
         }
     }
 
-    @Override
-    public void init() {
 
-    }
 
     @Override
     public String getTag() {
@@ -85,6 +96,10 @@ public class Projectile extends GameObject implements Disposable {
     @Override
     public void dispose() {
         defaultTextureReg.getTexture().dispose();
-        //Gdx.app.debug(getTag(), "disposed");
+    }
+
+    @Override
+    public void reset() {
+        init();
     }
 }

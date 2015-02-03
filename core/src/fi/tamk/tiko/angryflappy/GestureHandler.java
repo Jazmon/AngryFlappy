@@ -47,6 +47,7 @@ public class GestureHandler implements GestureListener {
 
     @Override
     public boolean zoom(float initialDistance, float distance) {
+        world.getDoge().jump();
         return false;
     }
 

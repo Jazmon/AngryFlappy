@@ -2,6 +2,7 @@ package fi.tamk.tiko.angryflappy;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Disposable;
@@ -20,11 +21,13 @@ public abstract class GameObject implements Disposable {
     protected TextureRegion defaultTextureReg;
     protected boolean alive;
     protected Rectangle bounds;
+    protected float rotation;
 
     public GameObject() {
         speed = new Vector2();
         scale = new Vector2(1, 1);
         friction = new Vector2();
+        rotation = 0;
         moving = false;
         speedPlus = 100.0f;
         bounds = new Rectangle();
@@ -33,6 +36,15 @@ public abstract class GameObject implements Disposable {
     }
 
     public abstract void draw(SpriteBatch batch);
+
+    public void drawDebug(ShapeRenderer shapeRenderer) {
+        shapeRenderer.rect(bounds.x, bounds.y,
+                bounds.width / 2, bounds.height / 2,
+                bounds.width, bounds.height,
+                scale.x, scale.y,
+                0
+        );
+    }
 
     public abstract void update(float deltaTime);
 

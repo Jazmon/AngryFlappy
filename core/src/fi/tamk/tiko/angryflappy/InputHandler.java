@@ -15,33 +15,20 @@ import com.badlogic.gdx.utils.Array;
 
 // TODO: GestureHandler for flinging
 public class InputHandler implements InputProcessor {
-    public static final String TAG = InputHandler.class.getName();
+    //private final int VIBRATION_TIME = 50;
+    private final long[] VIBRATION_PATTERN = {0, 33, 33};
+    //public static final String TAG = InputHandler.class.getName();
     private OrthographicCamera camera;
     private Array<TouchAction> pointers;
     private Vector3 touchpos;
-
     private GameWorld world;
-
-    public enum Move {
-        Left, Right, Jump, Shoot, JumpAndShoot
-    }
-
-    private class TouchAction {
-        public int pointer;
-        public Move move;
-
-        public TouchAction(int pointer, Move move) {
-            this.pointer = pointer;
-            this.move = move;
-        }
-    }
 
     public InputHandler(GameWorld world) {
         this.world = world;
         this.camera = new OrthographicCamera();
 
         touchpos = new Vector3();
-        pointers = new Array<TouchAction>();
+        pointers = new Array<>();
 
         camera.setToOrtho(false, Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
         camera.position.set(0, 0, 0);
@@ -60,9 +47,11 @@ public class InputHandler implements InputProcessor {
                 world.getDoge().setRightMove(true);
                 break;
             case Input.Keys.SPACE:
-                world.getDoge().shoot();
+
                 if (!world.getDoge().isInAir()) {
                     world.getDoge().jump();
+                    //world.getDoge().shoot();
+                    world.addWow(world.getDoge().shoot());
                 }
                 break;
         }
@@ -110,10 +99,12 @@ public class InputHandler implements InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         touchpos.set(screenX, screenY, 0);
         touchpos = camera.unproject(touchpos);
-
+        //Gdx.input.vibrate(VIBRATION_TIME);
+        Gdx.input.vibrate(VIBRATION_PATTERN, -1);
         if (touchpos.x <= 0 && touchpos.y < 0) {
             world.getDoge().setLeftMove(true);
             pointers.add(new TouchAction(pointer, Move.Left));
+
         } else if (touchpos.x > 0 && touchpos.y < 0) {
             world.getDoge().setRightMove(true);
             pointers.add(new TouchAction(pointer, Move.Right));
@@ -162,5 +153,19 @@ public class InputHandler implements InputProcessor {
     @Override
     public boolean scrolled(int amount) {
         return false;
+    }
+
+    public enum Move {
+        Left, Right, Jump, Shoot, JumpAndShoot
+    }
+
+    private class TouchAction {
+        public int pointer;
+        public Move move;
+
+        public TouchAction(int pointer, Move move) {
+            this.pointer = pointer;
+            this.move = move;
+        }
     }
 }

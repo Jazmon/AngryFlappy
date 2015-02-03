@@ -16,7 +16,7 @@ import com.badlogic.gdx.utils.Disposable;
  * Part of AngryFlappy in package fi.tamk.tiko.angryflappy.
  */
 public class GameRenderer implements Disposable {
-    private static final String TAG = GameRenderer.class.getName();
+    //private static final String TAG = GameRenderer.class.getName();
 
     private OrthographicCamera camera;
     //private OrthographicCamera guiCamera;
@@ -36,7 +36,7 @@ public class GameRenderer implements Disposable {
     private void init() {
         font = new BitmapFont();
         font.setScale(1.50f, 1.50f);
-        font.setColor(Color.BLUE);
+        font.setColor(Color.WHITE);
         background = new Texture("background.jpg");
 
         batch = new SpriteBatch();
@@ -62,7 +62,10 @@ public class GameRenderer implements Disposable {
                     -Constants.VIEWPORT_HEIGHT / 2,
                     Constants.VIEWPORT_WIDTH, Constants.VIEWPORT_HEIGHT);
             font.setScale(3.0f, 3.0f);
-            font.draw(batch, "GAME OVER", 0, 0);
+            font.setColor(217 / 255.0f, 0 / 255.0f, 255 / 255.0f, 255 / 255.0f);
+            font.draw(batch, "GAME OVER", -10, -30);
+            font.draw(batch, "SCORE: " + world.getScore(), -10, -80);
+            font.setColor(Color.WHITE);
             batch.end();
             return;
         }
@@ -77,12 +80,12 @@ public class GameRenderer implements Disposable {
 
         if (world.isDrawDebug()) {
             font.draw(batch, "Speed.x:" + world.getDoge().getSpeed().x +
-                            ", speedY: " + world.getDoge().getSpeed().y,
-                    -Constants.VIEWPORT_WIDTH / 2 + 30,
+                            ", Speed.y: " + world.getDoge().getSpeed().y,
+                    -Constants.VIEWPORT_WIDTH / 2 + 10,
                     -Constants.VIEWPORT_HEIGHT / 2 + 30);
+            font.draw(batch, "FPS:" + Gdx.graphics.getFramesPerSecond(), Constants.VIEWPORT_WIDTH / 2 - 100, Constants.VIEWPORT_HEIGHT / 2 - 30);
         }
-
-        font.draw(batch, "lives: " + world.getDoge().getLives(),
+        font.draw(batch, "Lives: " + world.getDoge().getLives(),
                 -Constants.VIEWPORT_WIDTH / 2 + 30, Constants.VIEWPORT_HEIGHT / 2 - 30);
         batch.end();
 

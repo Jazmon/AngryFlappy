@@ -1,15 +1,16 @@
 package fi.tamk.tiko.angryflappy;
 
 import com.badlogic.gdx.Application;
-import com.badlogic.gdx.ApplicationListener;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
 
-public class AngryFlappy implements ApplicationListener {
-    public static final String TAG = AngryFlappy.class.getName();
+public class AngryFlappy extends Game {
+    //public static final String TAG = AngryFlappy.class.getName();
 
     private GameWorld world;
     private GameRenderer renderer;
+
 
     @Override
     public void create() {
